@@ -44,26 +44,26 @@ const Home = () => {
   return (
     <div className="flex flex-col items-center">
       
-      {/* High-Performance Editorial Hero */}
+      {/* High-Performance Hero */}
       <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32 relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-            <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px] animate-pulse-slow"></div>
-            <div className="absolute -bottom-32 -right-32 w-[600px] h-[600px] bg-sky-500/5 rounded-full blur-[120px] animate-pulse-slow"></div>
+            <div className="absolute -top-32 -left-32 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-[120px]"></div>
+            <div className="absolute -bottom-32 -right-32 w-[600px] h-[600px] bg-sky-500/5 rounded-full blur-[120px]"></div>
         </div>
 
         <div className="relative z-10 flex flex-col items-center text-center">
              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mb-8 bg-white/50 backdrop-blur-md px-6 py-2 rounded-full border border-slate-100 shadow-xl group">
-                <ShieldCheck className="text-indigo-600 group-hover:scale-110 transition-transform" size={16} />
-                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-500">Verified Luxury Boutique Hub</span>
+                <ShieldCheck className="text-indigo-600" size={16} />
+                <span className="text-[10px] font-black tracking-[0.4em] uppercase text-slate-500">Verified Direct House Marketplace</span>
              </motion.div>
 
              <motion.h1 
                 initial={{ opacity: 0, y: 30 }} 
                 animate={{ opacity: 1, y: 0 }} 
                 transition={{ duration: 0.8, ease: "easeOut" }}
-                className="text-6xl md:text-8xl font-serif italic text-slate-900 leading-[1.05] tracking-tighter mb-10 italic font-black uppercase italic tracking-tighter"
+                className="text-6xl md:text-8xl font-serif font-black text-slate-900 leading-[1.05] tracking-tighter mb-10 uppercase italic-none"
              >
-                Discovering <br/> <span className="text-indigo-600">The Fine Art</span> <br/> of Living.
+                Find Your <br/> <span className="text-indigo-600">Perfect Home</span> <br/> With Ease.
              </motion.h1>
 
              <motion.p 
@@ -72,21 +72,21 @@ const Home = () => {
                 transition={{ delay: 0.4 }}
                 className="max-w-2xl text-slate-400 text-lg md:text-xl font-medium mb-12 leading-relaxed"
              >
-                Hand-curated real estate assets across the globe. Powered by secure location intelligence and instant handshake protocols.
+                Search verified houses, flats, and offices in your city. Chat directly with owners and schedule a visit in seconds.
              </motion.p>
 
-             {/* Search Command Center */}
+             {/* Search Area */}
              <motion.div 
                initial={{ opacity: 0, scale: 0.95 }} 
                animate={{ opacity: 1, scale: 1 }} 
                transition={{ delay: 0.6 }}
-               className="w-full max-w-4xl p-2 bg-white rounded-[3rem] shadow-2xl border border-slate-100 flex flex-col md:flex-row items-center gap-2 group hover:border-indigo-100 transition-all"
+               className="w-full max-w-4xl p-2 bg-white rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-slate-100 flex flex-col md:flex-row items-center gap-2 group hover:border-indigo-100 transition-all"
              >
                 <div className="flex-1 w-full flex items-center gap-6 px-8 py-4">
                     <Search className="text-indigo-600" size={24} />
                     <input 
                        type="text" 
-                       placeholder="EXPLORE BY LOCATION, NAME OR ASSET ID..." 
+                       placeholder="SEARCH BY LOCATION OR NAME..." 
                        className="w-full bg-transparent text-xs font-black tracking-widest outline-none uppercase"
                        value={searchQuery}
                        onChange={e => setSearchQuery(e.target.value)}
@@ -94,17 +94,17 @@ const Home = () => {
                 </div>
                 <div className="hidden md:block h-10 w-px bg-slate-100 mx-4"></div>
                 <div className="flex-1 w-full flex items-center gap-6 px-8 py-4 md:border-l border-slate-50">
-                    <Globe className="text-sky-500" size={24} />
-                    <span className="text-xs font-black tracking-widest text-slate-400 uppercase">Global Frequency Active</span>
+                    <MapPin className="text-sky-500" size={24} />
+                    <span className="text-xs font-black tracking-widest text-slate-400 uppercase">Available Everywhere</span>
                 </div>
-                <button className="w-full md:w-auto bg-slate-900 hover:bg-black text-white px-12 py-5 rounded-[2.2rem] text-[11px] font-black uppercase tracking-[0.3em] shadow-xl transition-all hover:scale-105 active:scale-95">
-                    INITIATE
+                <button className="w-full md:w-auto bg-slate-900 hover:bg-black text-white px-12 py-5 rounded-[1.5rem] md:rounded-[2.2rem] text-[11px] font-black uppercase tracking-[0.3em] shadow-xl transition-all hover:scale-105 active:scale-95">
+                    SEARCH NOW
                 </button>
              </motion.div>
         </div>
       </section>
 
-      {/* Dynamic Marketplace Control */}
+      {/* Grid Control */}
       <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
         <div className="flex flex-col md:flex-row justify-between items-center gap-10 mb-16 px-4">
             <div className="flex items-center gap-1.5 bg-slate-50 p-1.5 rounded-[2rem] border border-slate-100 overflow-x-auto custom-scrollbar w-full md:w-auto">
@@ -124,12 +124,12 @@ const Home = () => {
             
             <div className="flex items-center gap-4 text-slate-400">
                 <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-                    <Activity size={16} className="text-indigo-400" /> Real-time Inventory: {filteredProperties.length} Assets
+                    <Activity size={16} className="text-indigo-400" /> Houses Near You: {filteredProperties.length}
                 </span>
             </div>
         </div>
 
-        {/* Global Asset Grid */}
+        {/* Home Grid */}
         <AnimatePresence mode="wait">
             {loading ? (
                 <motion.div key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
@@ -154,10 +154,10 @@ const Home = () => {
                 </motion.div>
             ) : (
                 <EmptyState 
-                    title="Asset Frequency Missing"
-                    message="No premium selections currently matching your transmission parameters. Broaden your inquiry to discover more hand-curated assets."
+                    title="No Results Found"
+                    message="We couldn't find any properties matching your search. Try changing your filters or location."
                     icon={LayoutGrid}
-                    actionText="RESET ALL FILTERS"
+                    actionText="VIEW ALL PROPERTIES"
                     onAction={() => { setActiveType('All'); setSearchQuery(''); }}
                     color="indigo"
                 />
@@ -165,23 +165,23 @@ const Home = () => {
         </AnimatePresence>
       </section>
 
-      {/* Verification Footer Banner */}
+      {/* Trust Footer */}
       <footer className="w-full bg-slate-900 py-24 px-4 overflow-hidden relative">
           <div className="absolute top-0 right-0 p-32 opacity-10 -rotate-12 translate-x-20">
               <ShieldCheck size={400} className="text-indigo-500" />
           </div>
           <div className="max-w-4xl mx-auto text-center relative z-10">
-              <h4 className="font-serif italic text-4xl md:text-6xl text-white mb-8 italic font-black uppercase tracking-tighter italic">100% Curated Intelligence.</h4>
-              <p className="text-slate-400 text-lg mb-12 leading-relaxed">Every asset on HouseMate is verified by our boutique inspection protocol, ensuring 100% trust for the global marketplace.</p>
+              <h4 className="font-serif text-4xl md:text-6xl text-white mb-8 font-black uppercase tracking-tighter">Verified Homes. Direct Chats.</h4>
+              <p className="text-slate-400 text-lg mb-12 leading-relaxed">Every house on HouseMate is verified by our team, ensuring 100% trust for you and your family.</p>
               <div className="flex flex-col md:flex-row items-center justify-center gap-8">
                   <div className="flex flex-col items-center">
-                      <span className="text-indigo-400 text-6xl font-black italic tracking-tighter mb-2 italic">1k+</span>
-                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Verified Assets</span>
+                      <span className="text-indigo-400 text-6xl font-black tracking-tighter mb-2">1,000+</span>
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Verified Homes</span>
                   </div>
                   <div className="h-10 w-px bg-slate-800 hidden md:block"></div>
                   <div className="flex flex-col items-center">
-                      <span className="text-sky-400 text-6xl font-black italic tracking-tighter mb-2 italic">98%</span>
-                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Conversion Rate</span>
+                      <span className="text-sky-400 text-6xl font-black tracking-tighter mb-2">100%</span>
+                      <span className="text-[10px] font-black text-white uppercase tracking-widest">Direct Safety</span>
                   </div>
               </div>
           </div>

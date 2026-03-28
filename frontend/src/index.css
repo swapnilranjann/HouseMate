@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:ital,wght@1,400;1,500;1,600;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Lora:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -90,10 +90,27 @@ input, select, textarea {
     letter-spacing: -0.02em;
 }
 
-/* Mobile optimizations */
+/* Mobile optimizations and text safety */
 @media (max-width: 640px) {
-  .hero-text {
-    font-size: 2.5rem;
-    line-height: 1.1;
-  }
+  h1 { font-size: 2.25rem !important; line-height: 1.15 !important; }
+  h2 { font-size: 1.5rem !important; }
+  .p-10, .p-12, .p-14, .p-16 { padding: 1.5rem !important; }
+  .rounded-[2.5rem], .rounded-[3rem], .rounded-[3.5rem], .rounded-[4rem] { border-radius: 1.5rem !important; }
+  .max-w-7xl, .max-w-4xl { padding-left: 1rem !important; padding-right: 1rem !important; }
 }
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  h1 { font-size: 3.5rem !important; }
+}
+
+input, select, textarea {
+  @apply focus:outline-none focus:ring-4 focus:ring-indigo-600/5 transition-all duration-300;
+  max-width: 100% !important;
+}
+
+.font-black-condensed {
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.spacing-wide { letter-spacing: 0.3em; }
