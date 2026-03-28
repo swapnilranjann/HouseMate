@@ -174,20 +174,29 @@ const ChatPage = () => {
                     <div ref={msgEndRef} />
                 </div>
 
-                {/* Input Area */}
+                {/* Input Area / Termination Interface */}
                 <div className="p-8 border-t border-slate-100 bg-white">
-                    <form onSubmit={handleSendMessage} className="flex gap-4">
-                        <input 
-                            type="text"
-                            value={inputText}
-                            onChange={e => setInputText(e.target.value)}
-                            placeholder="TYPE YOUR RESPONSE HERE..."
-                            className="flex-1 px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black tracking-widest transition-all focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 outline-none"
-                        />
-                        <button type="submit" className="bg-slate-900 text-white p-4 rounded-2xl hover:bg-black transition-all shadow-xl active:scale-95">
-                            <Send size={24} />
-                        </button>
-                    </form>
+                    {activeChat.appointmentId?.status === 'rejected' ? (
+                        <div className="flex flex-col items-center justify-center p-6 bg-rose-50 rounded-3xl border border-rose-100 animate-pulse">
+                            <ShieldCheck className="text-rose-500 mb-2" size={24} />
+                            <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest text-center">
+                                Inquiry Denied - Secure Channel Terminated By Owner
+                            </p>
+                        </div>
+                    ) : (
+                        <form onSubmit={handleSendMessage} className="flex gap-4">
+                            <input 
+                                type="text"
+                                value={inputText}
+                                onChange={e => setInputText(e.target.value)}
+                                placeholder="TYPE YOUR RESPONSE HERE..."
+                                className="flex-1 px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black tracking-widest transition-all focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 outline-none"
+                            />
+                            <button type="submit" className="bg-slate-900 text-white p-4 rounded-2xl hover:bg-black transition-all shadow-xl active:scale-95">
+                                <Send size={24} />
+                            </button>
+                        </form>
+                    )}
                 </div>
             </>
         ) : (

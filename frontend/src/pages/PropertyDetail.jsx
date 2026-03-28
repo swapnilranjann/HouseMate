@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPropertyById, requestAppointment, incrementPropertyView } from '../services/api';
-import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building } from 'lucide-react';
+import { getPropertyById, requestAppointment, incrementPropertyView, getMyAppointments, getChats } from '../services/api';
+import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building, Lock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import toast from 'react-hot-toast';
 
@@ -12,11 +12,13 @@ const PropertyDetail = () => {
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [requestStatus, setRequestStatus] = useState('idle');
+  const [existingChatId, setExistingChatId] = useState(null);
 
   useEffect(() => {
     fetchProperty();
     incrementPropertyView(id);
-  }, [id]);
+    if (user) checkExistingStatus();
+  }, [id, user]);
 
   const fetchProperty = async () => {
     try {
@@ -29,15 +31,41 @@ const PropertyDetail = () => {
     }
   };
 
+  const checkExistingStatus = async () => {
+    try {
+        const [aRes, cRes] = await Promise.all([getMyAppointments(), getChats()]);
+        const appt = aRes.data.find(a => a.propertyId?._id === id);
+        if (appt) setRequestStatus(appt.status);
+        
+        const chat = cRes.data.find(c => c.appointmentId?._id === appt?._id);
+        if (chat) setExistingChatId(chat._id);
+    } catch (err) {
+        console.error("Status Check Error:", err);
+    }
+  };
+
   const handleRequestAppointment = async () => {
     if (!user) return navigate('/customer/login');
     try {
       await requestAppointment(id);
-      setRequestStatus('sent');
+      setRequestStatus('pending');
       toast.success('Inquiry transmitted! The lister will correspond soon.');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Transaction error');
     }
+  };
+
+  const handleMessageTap = () => {
+     if (!user) return navigate('/customer/login');
+     if (existingChatId && requestStatus === 'approved') {
+        navigate(`/chats/${existingChatId}`);
+     } else if (requestStatus === 'pending') {
+        toast('Secure channel opens once the owner approves your visit.', { icon: '🔐' });
+     } else if (requestStatus === 'rejected') {
+        toast.error('This inquiry was denied. Communication is blocked.');
+     } else {
+        toast.error('Submit an inspection request first to open a secure channel.');
+     }
   };
 
   if (loading) return <div className="h-screen flex items-center justify-center animate-pulse text-indigo-600 font-serif italic text-xl">Establishing secure link...</div>;
@@ -66,22 +94,22 @@ const PropertyDetail = () => {
             {/* Hero Gallery */}
             <div className="grid grid-cols-4 gap-4 h-[500px]">
                 <div className="col-span-4 md:col-span-3 rounded-[3rem] overflow-hidden relative group shadow-2xl">
-                    <img src={`http://localhost:5000${property.images[0]}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={property.name} />
+                    <img src={property.images?.[0] ? `http://localhost:5000${property.images[0]}` : ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={property.name} />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent p-12">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white rounded-full text-[9px] font-black tracking-widest uppercase mb-4 shadow-xl">
                             Verified Offering
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-serif italic text-white font-black tracking-tighter italic">878 {property.name}</h1>
+                        <h1 className="text-4xl md:text-6xl font-serif italic text-white font-black tracking-tighter italic">{property.name}</h1>
                         <p className="text-white/70 font-bold text-sm mt-2 flex items-center gap-2"><MapPin size={16} className="text-sky-400" /> {property.address}</p>
                     </div>
                 </div>
                 <div className="hidden md:flex flex-col gap-4">
-                    {property.images.slice(1, 3).map((img, i) => (
+                    {property.images?.slice(1, 3).map((img, i) => (
                         <div key={i} className="flex-1 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-xl group cursor-pointer">
                             <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Spec View" />
                         </div>
                     ))}
-                    {property.images.length > 3 && (
+                    {property.images?.length > 3 && (
                         <div className="flex-1 rounded-[2.5rem] bg-slate-900 flex items-center justify-center text-white border-4 border-white shadow-xl cursor-pointer hover:bg-black transition-all">
                             <span className="text-[10px] font-black tracking-widest">+{property.images.length - 3} MORE</span>
                         </div>
@@ -95,7 +123,7 @@ const PropertyDetail = () => {
                     { label: 'Type', value: property.type, icon: Layout, color: 'text-indigo-600' },
                     { label: 'Configuration', value: property.bhk + ' BHK', icon: Bed, color: 'text-sky-500' },
                     { label: 'Floor Level', value: property.floor, icon: Building, color: 'text-rose-500' },
-                    { label: 'Area Details', value: property.dimensions + ' SqFt', icon: MapIcon, color: 'text-emerald-500' }
+                    { label: 'Area Details', value: (property.dimensions || '800') + ' SqFt', icon: MapIcon, color: 'text-emerald-500' }
                 ].map((spec, i) => (
                     <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all">
                          <div className={`p-4 rounded-2xl bg-slate-50 mb-4 ${spec.color} group-hover:scale-110 transition-transform shadow-sm`}>
@@ -142,12 +170,12 @@ const PropertyDetail = () => {
                 <div className="mt-16 pt-16 border-t border-slate-100 flex items-center justify-between gap-6">
                     <div className="flex items-center gap-6">
                         <div className="w-16 h-16 bg-slate-900 rounded-[1.5rem] flex items-center justify-center text-white font-black text-2xl shadow-xl">
-                            {property.listerId?.name?.[0]}
+                            {property.listerId?.name?.[0] || 'O'}
                         </div>
                         <div>
                             <h4 className="text-xl font-serif italic font-black text-slate-900 italic">Verified Owner</h4>
                             <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest flex items-center gap-1.5">
-                                <ShieldCheck size={14} /> ID: HM_V_E4{property.listerId?._id?.slice(-5).toUpperCase()}
+                                <ShieldCheck size={14} /> ID: HM_V_{property.listerId?._id?.slice(-5).toUpperCase() || 'E48243'}
                             </p>
                         </div>
                     </div>
@@ -163,15 +191,17 @@ const PropertyDetail = () => {
         <div className="w-full lg:w-96 shrink-0">
             <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-2xl p-10 lg:sticky lg:top-24">
                 
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex justify-between items-center mb-10">
                    <div>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Market Status</p>
-                       <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-full text-[9px] font-black uppercase tracking-widest leading-none">Immediate Availability</span>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">Market Status</p>
+                       <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest leading-none ${property.status === 'open' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
+                           {property.status === 'open' ? 'Immediate Availability' : 'Listing Booked'}
+                       </span>
                    </div>
                    <div className="text-right">
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Metrics</p>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">Metrics</p>
                        <div className="flex items-center gap-2 text-indigo-600 font-black">
-                          <Eye size={16} /> <span className="text-sm">3</span>
+                          <Eye size={16} /> <span className="text-sm">{property.views || 0}</span>
                        </div>
                    </div>
                 </div>
@@ -182,21 +212,30 @@ const PropertyDetail = () => {
                             Request Inspection
                         </button>
                     ) : ( 
-                        <div className="w-full bg-slate-50 border border-slate-100 text-slate-400 py-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-center shadow-inner">
-                            Request Sent
+                        <div className={`w-full py-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-center shadow-inner border flex items-center justify-center gap-3 ${
+                            requestStatus === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                            requestStatus === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                            'bg-rose-50 text-rose-600 border-rose-100'
+                        }`}>
+                            {requestStatus === 'pending' && <><Clock size={16}/> INQUIRY SENT</>}
+                            {requestStatus === 'approved' && <><ShieldCheck size={16}/> VISIT SECURED</>}
+                            {requestStatus === 'rejected' && <><Lock size={16}/> REQUEST DENIED</>}
                         </div>
                     )}
                     
                     <div className="flex items-center gap-4">
                         <button 
-                            onClick={() => navigate('/chats')}
-                            className="bg-white border border-slate-200 p-4 rounded-xl text-indigo-600 hover:bg-indigo-50 hover:border-indigo-100 transition-all shadow-sm"
-                            title="Open Channels"
+                            onClick={handleMessageTap}
+                            className={`p-4 rounded-xl shadow-sm transition-all border flex-1 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest ${
+                                existingChatId && requestStatus === 'approved' 
+                                ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-black' 
+                                : 'bg-white text-slate-400 border-slate-200 hover:text-slate-900 group'
+                            }`}
                         >
-                            <MessageSquare size={18} />
+                            <MessageSquare size={18} /> {existingChatId && requestStatus === 'approved' ? 'OPEN SECURE CHAT' : 'CHANNELS'}
                         </button>
-                        <button className="flex-1 bg-white border border-slate-200 text-slate-400 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-slate-900 transition-all shadow-sm flex items-center justify-center gap-2">
-                             Share Listing <Share2 size={14} />
+                        <button className="p-4 bg-white border border-slate-200 text-slate-400 rounded-xl hover:text-slate-900 transition-all shadow-sm">
+                             <Share2 size={18} />
                         </button>
                     </div>
                 </div>
@@ -205,7 +244,10 @@ const PropertyDetail = () => {
                 <div className="mt-12 p-8 bg-indigo-600 rounded-[2.5rem] text-white overflow-hidden relative shadow-2xl">
                     <div className="relative z-10">
                         <h4 className="font-serif italic text-xl font-black italic mb-2">100% Secured</h4>
-                        <p className="text-indigo-100 text-[10px] font-medium leading-relaxed">This property was verified by HouseMate Intelligence. Booking requests are encrypted and shared only with the verified owner.</p>
+                        <p className="text-indigo-100 text-[11px] font-medium leading-relaxed">This property was verified by HouseMate Intelligence. Booking requests are encrypted and shared only with the verified owner.</p>
+                    </div>
+                    <div className="absolute -bottom-6 -right-6 opacity-20 rotate-12">
+                        <ShieldCheck size={120} />
                     </div>
                 </div>
             </div>
