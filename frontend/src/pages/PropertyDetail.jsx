@@ -57,14 +57,12 @@ const PropertyDetail = () => {
 
   const handleMessageTap = () => {
      if (!user) return navigate('/customer/login');
-     if (existingChatId && requestStatus === 'approved') {
+     if (existingChatId && requestStatus !== 'rejected') {
         navigate(`/chats/${existingChatId}`);
-     } else if (requestStatus === 'pending') {
-        toast('Secure channel opens once the owner approves your visit.', { icon: '🔐' });
      } else if (requestStatus === 'rejected') {
         toast.error('This inquiry was denied. Communication is blocked.');
      } else {
-        toast.error('Submit an inspection request first to open a secure channel.');
+        toast.error('Submit an inspection request first to open a direct channel.');
      }
   };
 
