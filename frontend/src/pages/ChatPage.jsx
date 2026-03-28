@@ -88,7 +88,7 @@ const ChatPage = () => {
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
             {chats.length > 0 ? chats.map(c => {
-                const other = c.participants.find(p => p._id !== user.id);
+                const other = c.participants.find(p => (p._id || p) !== user.id);
                 const isActive = id === c._id;
                 return (
                     <button 
@@ -121,12 +121,12 @@ const ChatPage = () => {
                 <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                     <div className="flex items-center gap-6">
                         <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center font-black text-xl text-white shadow-xl relative">
-                            {activeChat.participants.find(p => p._id !== user.id)?.name[0]}
+                            {activeChat.participants.find(p => (p._id || p) !== user.id)?.name?.[0]}
                             <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-4 border-white rounded-full"></span>
                         </div>
                         <div>
                             <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                                {activeChat.participants.find(p => p._id !== user.id)?.name}
+                                {activeChat.participants.find(p => (p._id || p) !== user.id)?.name}
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
                                 <ShieldCheck className="text-indigo-600" size={14} />

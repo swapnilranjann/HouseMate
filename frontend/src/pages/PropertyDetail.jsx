@@ -37,12 +37,15 @@ const PropertyDetail = () => {
   const checkExistingStatus = async (forceInquiryResult = null) => {
     try {
         const [aRes, cRes] = await Promise.all([getMyAppointments(), getChats()]);
-        const appt = aRes.data.find(a => a.propertyId?._id === id);
+        const appt = aRes.data.find(a => String(a.propertyId?._id) === String(id));
         
         if (appt) setRequestStatus(appt.status);
         else if (forceInquiryResult) setRequestStatus('pending');
 
-        const chat = cRes.data.find(c => c.appointmentId?._id === appt?._id || c.appointmentId === (appt?._id || forceInquiryResult?._id));
+        const chat = cRes.data.find(c => 
+            String(c.appointmentId?._id) === String(appt?._id) || 
+            String(c.appointmentId?._id || c.appointmentId) === String(appt?._id || forceInquiryResult?._id)
+        );
         if (chat) {
             setExistingChatId(chat._id);
             return chat._id;
