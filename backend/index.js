@@ -3,11 +3,13 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const morgan = require('morgan');
 
 dotenv.config();
 
 const app = express();
 
+app.use(morgan('dev')); // Clean request logging
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
