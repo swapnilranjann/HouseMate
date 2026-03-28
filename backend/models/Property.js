@@ -13,6 +13,7 @@ const propertySchema = new mongoose.Schema({
   images: [{ type: String }],
   status: { type: String, enum: ['open', 'booked'], default: 'open' },
   views: { type: Number, default: 0 },
+  locationLink: { type: String, required: true },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Property', propertySchema);

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { getProperties, getMyAppointments, createProperty, updatePropertyStatus, updateAppointmentStatus } from '../services/api';
-import { Plus, Home, MapPin, Eye, Upload, Check, X, ShieldCheck, LayoutGrid, Clock, Calendar, MessageSquare, AlertCircle, Briefcase, ShoppingBag, Building, ArrowUpRight, PlusCircle } from 'lucide-react';
+import { Plus, Home, MapPin, Eye, Upload, Check, X, ShieldCheck, LayoutGrid, Clock, Calendar, MessageSquare, AlertCircle, Briefcase, ShoppingBag, Building, ArrowUpRight, PlusCircle, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import DashboardHeader from '../components/DashboardHeader';
+import EmptyState from '../components/EmptyState';
 
 const TenantDashboard = () => {
   const [activeTab, setActiveTab] = useState('listings');
@@ -14,7 +16,7 @@ const TenantDashboard = () => {
   const location = useLocation();
 
   const [formData, setFormData] = useState({
-    name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House'
+    name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House', locationLink: ''
   });
   const [images, setImages] = useState([]);
 
@@ -54,6 +56,10 @@ const TenantDashboard = () => {
 
   const handleCreateProperty = async (e) => {
     e.preventDefault();
+    if (!formData.locationLink.includes('google.com/maps')) {
+       return toast.error("Please provide a valid Google Maps link");
+    }
+
     const data = new FormData();
     Object.keys(formData).forEach(key => data.append(key, formData[key]));
     Array.from(images).forEach(img => data.append('images', img));
@@ -61,10 +67,10 @@ const TenantDashboard = () => {
     try {
       await createProperty(data);
       setShowForm(false);
-      setFormData({ name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House' });
+      setFormData({ name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House', locationLink: '' });
       setImages([]);
       fetchData();
-      toast.success('Property listed successfully!');
+      toast.success('Property listed successfully with secure location!');
     } catch (err) {
       toast.error('Failed to list property');
     }
@@ -82,35 +88,17 @@ const TenantDashboard = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Editorial Header Section */}
-      <div className="bg-slate-900 rounded-[2.5rem] p-10 md:p-14 mb-10 text-white relative overflow-hidden shadow-2xl">
-          <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
-              <div className="max-w-xl">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="bg-sky-500/10 p-2 rounded-xl border border-sky-500/20">
-                        <LayoutGrid className="text-sky-400" size={20} />
-                    </div>
-                    <span className="text-sky-400 font-black text-[10px] uppercase tracking-[0.2em] leading-none">Property Manager</span>
-                  </div>
-                  <h1 className="text-5xl md:text-6xl font-serif italic font-black tracking-tighter mb-4 leading-none text-white">Owner <span className="text-sky-400">Portal</span></h1>
-                  <p className="text-slate-400 font-medium text-base">Managing your real-estate portfolio with a classic, high-end approach. Tracking {properties.length} active listings across your enterprise.</p>
-              </div>
-
-              <div className="flex flex-wrap gap-4">
-                  <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] min-w-[140px] shadow-inner">
-                      <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1 leading-none">Total Assets</p>
-                      <h3 className="text-4xl font-serif italic font-black">{properties.length}</h3>
-                  </div>
-                  <div className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-[2rem] min-w-[140px] shadow-inner">
-                      <p className="text-slate-400 text-[9px] font-black uppercase tracking-widest mb-1 leading-none">Pending Inquiries</p>
-                      <h3 className="text-4xl font-serif italic font-black text-sky-400">{appointments.filter(a => a.status === 'pending').length}</h3>
-                  </div>
-              </div>
-          </div>
-          
-          <div className="absolute -bottom-24 -right-24 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
-          <div className="absolute -top-24 -left-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl animate-pulse-slow"></div>
-      </div>
+      <DashboardHeader 
+        title={<>Owner <span className="text-sky-400">Portal</span></>}
+        subtitle={`Managing your real-estate portfolio with a classic, high-end approach. Tracking ${properties.length} active listings across your enterprise.`}
+        icon={LayoutGrid}
+        roleLabel="Property Manager"
+        accentColor="sky"
+        stats={[
+          { label: "Total Assets", value: properties.length },
+          { label: "Pending Inquiries", value: appointments.filter(a => a.status === 'pending').length, highlight: true }
+        ]}
+      />
 
       {/* Main Controller Area */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
@@ -140,7 +128,7 @@ const TenantDashboard = () => {
                 <div className="bg-white rounded-[3rem] border border-slate-200 shadow-2xl overflow-hidden">
                     <div className="bg-slate-50 p-10 border-b border-slate-100 flex items-center justify-between">
                         <div>
-                            <h2 className="text-3xl font-serif italic font-black text-slate-900 tracking-tighter uppercase leading-none mb-2">Create New Listing</h2>
+                            <h2 className="text-3xl font-serif italic font-black text-slate-900 tracking-tighter uppercase leading-none mb-2 italic font-black">Create New Listing</h2>
                             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">Provide detailed information to attract premium tenants.</p>
                         </div>
                         <ShieldCheck className="text-sky-500 animate-pulse-slow" size={40} />
@@ -159,13 +147,17 @@ const TenantDashboard = () => {
                          </div>
                          <div className="space-y-6">
                             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Location Tracking</label>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-3">
                                 <input type="text" placeholder="ID/No." required className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} />
                                 <input type="text" placeholder="Floor" required className="w-full px-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} />
                             </div>
                             <div className="relative">
                                 <MapPin className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
                                 <input type="text" placeholder="Full Location Address" required className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                            </div>
+                            <div className="relative">
+                                <Globe className="absolute left-5 top-1/2 -translate-y-1/2 text-sky-400" size={18} />
+                                <input type="url" placeholder="Paste Google Maps Link (Mandatory)" required className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.locationLink} onChange={e => setFormData({...formData, locationLink: e.target.value})} />
                             </div>
                          </div>
                          <div className="space-y-6">
@@ -235,16 +227,14 @@ const TenantDashboard = () => {
                     </div>
                 ))}
                 {properties.length === 0 && (
-                    <div className="col-span-full py-32 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100 flex flex-col items-center gap-6">
-                        <div className="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
-                             <Home size={40} />
-                        </div>
-                        <div>
-                            <h2 className="text-3xl font-serif italic text-slate-900 tracking-tighter uppercase leading-none mb-2">Portfolio Empty</h2>
-                            <p className="text-slate-400 mt-2 font-bold text-[10px] uppercase tracking-widest max-w-xs mx-auto">Start listing your premium properties to attract high-tier tenants.</p>
-                        </div>
-                        <button onClick={() => setShowForm(true)} className="mt-4 bg-slate-900 text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all">LIst YOUR FIRST ASSET</button>
-                    </div>
+                   <EmptyState 
+                    title="Portfolio Empty"
+                    message="Start listing your premium properties to attract high-tier tenants. Every listing now requires a secure location link for verification."
+                    icon={Home}
+                    actionText="LIST YOUR FIRST ASSET"
+                    onAction={() => setShowForm(true)}
+                    color="sky"
+                   />
                 )}
             </div>
         ) : (
@@ -256,7 +246,7 @@ const TenantDashboard = () => {
                                 {a.customerId?.name?.[0]}
                             </div>
                             <div>
-                                <h4 className="text-xl font-serif italic font-black text-slate-900 tracking-tight italic mb-1 uppercase">{a.customerId?.name}</h4>
+                                <h4 className="text-xl font-serif italic font-black text-slate-900 tracking-tight mb-1 uppercase italic">{a.customerId?.name}</h4>
                                 <div className="flex items-center gap-3">
                                     <span className="bg-sky-50 text-sky-600 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border border-sky-100 flex items-center gap-1.5 leading-none"><Calendar size={12}/> Visit Requested</span>
                                     <span className="text-slate-400 font-bold text-[10px] uppercase tracking-widest leading-none">For <span className="text-slate-900 underline decoration-sky-300 underline-offset-4">{a.propertyId?.name}</span></span>
@@ -283,11 +273,12 @@ const TenantDashboard = () => {
                         </div>
                     </div>
                  )) : (
-                    <div className="py-24 text-center bg-white rounded-[4rem] border border-slate-200">
-                         <Calendar size={48} className="text-slate-200 mx-auto mb-6" />
-                         <h3 className="text-2xl font-serif italic font-black text-slate-900 mb-2 uppercase tracking-tighter italic">Schedule Idle</h3>
-                         <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest">No active visit requests have been logged today.</p>
-                    </div>
+                    <EmptyState 
+                      title="Schedule Idle"
+                      message="No active visit requests have been logged today. Your Enterprise schedule is clear."
+                      icon={Calendar}
+                      color="sky"
+                    />
                  )}
             </div>
         )}
