@@ -1,147 +1,154 @@
 import React, { useState, useEffect } from 'react';
 import { getProperties } from '../services/api';
 import PropertyCard from '../components/PropertyCard';
-import { Search, SlidersHorizontal, Activity, Home as HomeIcon, Building, Briefcase, ShoppingBag, LayoutGrid } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Search, MapPin, Home as HomeIcon, LayoutGrid, Building, Briefcase, ShoppingBag, Activity, ChevronRight, Filter } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Home = () => {
   const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
   const [activeType, setActiveType] = useState('All');
-
-  const categories = [
-    { name: 'All', icon: LayoutGrid },
-    { name: 'House', icon: HomeIcon },
-    { name: 'Flat', icon: Building },
-    { name: 'Office', icon: Briefcase },
-    { name: 'Shop', icon: ShoppingBag },
-  ];
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchProperties();
-  }, [activeType]);
+    fetchProps();
+  }, []);
 
-  const fetchProperties = async () => {
-    setLoading(true);
+  const fetchProps = async () => {
     try {
-      const { data } = await getProperties(activeType === 'All' ? null : activeType);
+      const { data } = await getProperties();
       setProperties(data);
     } catch (err) {
-      console.error('Failed to fetch properties');
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  const filteredProperties = properties.filter(p => 
-    (p.status === 'open' || !p.status) && (
-    p.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    p.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (p.bhk && p.bhk.includes(searchTerm))
-    )
-  );
+  const types = [
+    { name: 'All', icon: <LayoutGrid size={14} /> },
+    { name: 'House', icon: <HomeIcon size={14} /> },
+    { name: 'Flat', icon: <Building size={14} /> },
+    { name: 'Office', icon: <Briefcase size={14} /> },
+    { name: 'Shop', icon: <ShoppingBag size={14} /> },
+  ];
+
+  const filteredProperties = properties.filter(p => {
+    const matchesType = activeType === 'All' || p.type === activeType;
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                         p.address.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesType && matchesSearch;
+  });
 
   return (
-    <div className="flex-1 w-full bg-slate-50 flex flex-col">
-      {/* Search & Hero Section */}
-      <div className="bg-white border-b border-gray-200 pt-16 pb-12 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-            <div>
-              <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight mb-4">
-                Explore <span className="text-indigo-600">Premium</span> Spaces
-              </h1>
-              <p className="text-lg text-slate-500 max-w-2xl font-medium leading-relaxed">
-                Connect with verified property owners. Whether it's a home, a startup office, or a premium retail shop, find it all here.
-              </p>
-            </div>
-            
-            <div className="w-full md:max-w-md">
-                <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-600 transition-colors">
-                        <Search size={22} />
-                    </div>
+    <div className="flex flex-col items-center">
+      
+      {/* Editorial Hero Section */}
+      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 relative overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-500/5 rounded-full blur-[120px]"></div>
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-sky-500/5 rounded-full blur-[120px]"></div>
+
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="max-w-2xl text-center md:text-left">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mb-6 bg-slate-50 px-4 py-1.5 rounded-full border border-slate-100 self-center md:self-start w-fit">
+                    <span className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse"></span>
+                    <span className="text-[10px] font-black tracking-widest uppercase text-slate-500">Premium Real Estate Hub</span>
+                </motion.div>
+                <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="text-5xl md:text-7xl font-serif italic text-slate-900 leading-[1.1] tracking-tighter mb-8">
+                    Curating <span className="text-indigo-600 underline-offset-8">Exquisite</span> <br/> Living Spaces.
+                </motion.h1>
+                <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-slate-400 text-lg md:text-xl font-medium max-w-lg mb-12">
+                    Connect with verified property owners. Whether it's a legacy home, a startup office, or a boutique retail shop.
+                </motion.p>
+
+                {/* Refined Search Area */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="relative max-w-md group">
+                    <div className="absolute inset-x-0 bottom-0 bg-indigo-600/10 h-1 rounded-full transition-all group-focus-within:h-full group-focus-within:bg-indigo-600/5"></div>
+                    <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" size={20} />
                     <input 
                         type="text" 
-                        placeholder="Search by city or name..."
-                        className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 text-slate-900 font-bold transition-all placeholder-slate-400 shadow-inner"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
+                        placeholder="Search by city or property name..." 
+                        className="w-full pl-14 pr-6 py-5 bg-white border border-slate-200 rounded-3xl text-sm font-bold shadow-sm focus:shadow-xl focus:border-indigo-600 transition-all outline-none"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
                     />
-                </div>
+                </motion.div>
             </div>
-          </div>
 
-          {/* Category Chips */}
-          <div className="flex items-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat.name}
-                onClick={() => setActiveType(cat.name)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold transition-all border shrink-0 ${
-                  activeType === cat.name 
-                  ? 'bg-slate-900 border-slate-900 text-white shadow-lg scale-105' 
-                  : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300 hover:text-indigo-600'
-                }`}
-              >
-                <cat.icon size={18} />
-                <span>{cat.name === 'All' ? 'Everything' : `${cat.name}s`}</span>
-              </button>
-            ))}
-          </div>
+            {/* Visual Teaser */}
+            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }} className="hidden md:block w-1/3">
+                <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100 relative group overflow-hidden">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                           <Activity size={20} />
+                        </div>
+                        <span className="text-[10px] font-black uppercase text-slate-400 tracking-widest italic">Market Active</span>
+                    </div>
+                    <h3 className="text-2xl font-serif font-black text-slate-900 mb-2">Portfolio Overview</h3>
+                    <p className="text-xs text-slate-400 font-medium">Monitoring {properties.length} active listings across 5 categories.</p>
+                    <div className="absolute -bottom-10 -right-10 opacity-5">
+                       <LayoutGrid size={200} />
+                    </div>
+                </div>
+            </motion.div>
         </div>
+      </section>
+
+      {/* Categories Bar */}
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16 overflow-x-auto custom-scrollbar pb-6 flex items-center gap-4">
+          <div className="p-2 bg-white rounded-2xl border border-slate-100 flex items-center gap-2 shadow-sm">
+             <Filter size={16} className="text-slate-400 mx-2" />
+             <div className="w-px h-6 bg-slate-100 mr-2"></div>
+             {types.map(t => (
+                <button 
+                  key={t.name}
+                  onClick={() => setActiveType(t.name)}
+                  className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeType === t.name ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-slate-900 hover:bg-slate-50'}`}
+                >
+                  {t.icon} {t.name}
+                </button>
+             ))}
+          </div>
       </div>
 
       {/* Results Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 group cursor-default">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-32">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
             <div>
-                <h2 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3 leading-none">
-                    Available <span className="text-indigo-600 underline decoration-indigo-500/20 underline-offset-[12px]">{activeType === 'All' ? 'Properties' : `${activeType}s`}</span>
+                <h2 className="text-4xl font-serif italic font-black text-slate-900 tracking-tight leading-none mb-4">
+                    Active <span className="text-indigo-600">{activeType === 'All' ? 'Portfolio' : `${activeType}s`}</span>
                 </h2>
-                <div className="h-1.5 w-16 bg-indigo-500 mt-4 rounded-full group-hover:w-32 transition-all duration-700"></div>
-            </div>
-            <div className="flex items-center gap-3 bg-white text-slate-900 px-6 py-3 rounded-2xl border border-slate-200 shadow-sm self-start">
-                <Activity size={18} className="text-indigo-500 animate-pulse" />
-                <span className="text-sm font-black uppercase tracking-widest leading-none">{filteredProperties.length} Total Matches</span>
+                <div className="flex items-center gap-2">
+                    <div className="h-1 w-12 bg-indigo-600 rounded-full"></div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Viewing {filteredProperties.length} Matches</span>
+                </div>
             </div>
         </div>
 
         {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {[1, 2, 3, 4, 5, 6].map(i => (
-                    <div key={i} className="bg-white aspect-[4/5] animate-pulse rounded-3xl border border-slate-200 shadow-sm"></div>
-                ))}
-            </div>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+                {[1,2,3].map(i => <div key={i} className="h-96 bg-white animate-pulse border border-slate-100 rounded-[2.5rem] shadow-sm"></div>)}
+             </div>
         ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredProperties.length > 0 ? (
-                    filteredProperties.map((p, idx) => (
-                        <motion.div
-                            key={p._id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.05 }}
-                        >
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 lg:gap-12">
+                <AnimatePresence>
+                    {filteredProperties.map(p => (
+                        <motion.div key={p._id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}>
                             <PropertyCard property={p} />
                         </motion.div>
-                    ))
-                ) : (
-                    <div className="col-span-full py-32 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-200 shadow-inner">
-                        <div className="bg-slate-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                            <Search className="w-10 h-10 text-slate-300" />
-                        </div>
-                        <p className="text-2xl text-slate-900 font-black tracking-tight">No {activeType}s Found</p>
-                        <p className="text-slate-500 mt-2 font-medium">Try checking another category or clearing your search.</p>
-                        <button 
-                            onClick={() => {setActiveType('All'); setSearchTerm('');}}
-                            className="mt-8 text-indigo-600 font-bold hover:underline underline-offset-4"
-                        >
-                            Reset all filters
-                        </button>
-                    </div>
-                )}
+                    ))}
+                </AnimatePresence>
+             </div>
+        )}
+
+        {filteredProperties.length === 0 && !loading && (
+            <div className="py-32 text-center bg-white rounded-[3rem] border border-slate-100 shadow-inner flex flex-col items-center gap-6">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
+                    <Search size={40} />
+                </div>
+                <h3 className="text-2xl font-serif italic font-black text-slate-900 tracking-tight uppercase">Search yielded zero results</h3>
+                <p className="text-slate-400 font-medium max-w-xs mx-auto">Try adjusting your filters or search keywords to explore more premiums.</p>
+                <button onClick={() => { setActiveType('All'); setSearchQuery(''); }} className="text-indigo-600 font-black text-[10px] uppercase tracking-widest underline underline-offset-8">RESET FILTERS</button>
             </div>
         )}
       </div>
