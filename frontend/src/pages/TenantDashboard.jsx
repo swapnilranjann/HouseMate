@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { getProperties, getMyAppointments, createProperty, updatePropertyStatus, updateAppointmentStatus } from '../services/api';
-import { Plus, Home, MapPin, Eye, Upload, Check, X, ShieldCheck, LayoutGrid, Clock, Calendar, MessageSquare, AlertCircle } from 'lucide-react';
+import { Plus, Home, MapPin, Eye, Upload, Check, X, ShieldCheck, LayoutGrid, Clock, Calendar, MessageSquare, AlertCircle, Briefcase, ShoppingBag, Building } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const TenantDashboard = () => {
   const [activeTab, setActiveTab] = useState('listings');
@@ -12,7 +13,7 @@ const TenantDashboard = () => {
 
   // Form State
   const [formData, setFormData] = useState({
-    name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: ''
+    name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House'
   });
   const [images, setImages] = useState([]);
 
@@ -26,7 +27,8 @@ const TenantDashboard = () => {
         getProperties(),
         getMyAppointments()
       ]);
-      setProperties(pRes.data.filter(p => p.listerId._id === JSON.parse(localStorage.getItem('house_user')).id));
+      const user = JSON.parse(localStorage.getItem('house_user'));
+      setProperties(pRes.data.filter(p => p.listerId._id === user.id));
       setAppointments(aRes.data);
     } catch (err) {
        console.error(err);
@@ -44,10 +46,12 @@ const TenantDashboard = () => {
     try {
       await createProperty(data);
       setShowForm(false);
+      setFormData({ name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House' });
+      setImages([]);
       fetchData();
-      alert('Property listed successfully!');
+      toast.success('Property listed successfully!');
     } catch (err) {
-      alert('Failed to list property');
+      toast.error('Failed to list property');
     }
   };
 
@@ -55,9 +59,9 @@ const TenantDashboard = () => {
     try {
       await updateAppointmentStatus(id, status);
       fetchData();
-      alert(`Appointment ${status}!`);
+      toast.success(`Appointment ${status}!`);
     } catch (err) {
-      alert('Error updating appointment');
+      toast.error('Error updating appointment');
     }
   };
 
@@ -65,9 +69,18 @@ const TenantDashboard = () => {
     try {
       await updatePropertyStatus(id, status);
       fetchData();
-      alert(`Property status updated to ${status}`);
+      toast.success(`Property status updated to ${status}`);
     } catch (err) {
-      alert('Error updating status');
+      toast.error('Error updating status');
+    }
+  };
+
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case 'Office': return <Briefcase size={14} />;
+      case 'Shop': return <ShoppingBag size={14} />;
+      case 'Flat': return <Building size={14} />;
+      default: return <Home size={14} />;
     }
   };
 
@@ -77,64 +90,84 @@ const TenantDashboard = () => {
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-1">
           <h1 className="text-4xl font-extrabold flex items-center gap-3">
-             <LayoutGrid className="title-gradient" size={32} /> Tenant <span className="title-gradient">Hub</span>
+             <LayoutGrid className="text-sky-500" size={32} /> Owner <span className="text-sky-500">Portal</span>
           </h1>
-          <p className="text-text-muted text-sm font-medium opacity-60 uppercase tracking-widest">Manage your real estate empire</p>
+          <p className="text-slate-400 text-sm font-medium uppercase tracking-widest">Manage your real estate assets</p>
         </div>
 
-        <div className="flex bg-bg-card p-1 rounded-2xl border border-border-glass">
-           <button onClick={() => setActiveTab('listings')} className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'listings' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-text-muted hover:text-white'}`}>Listings</button>
-           <button onClick={() => setActiveTab('appointments')} className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'appointments' ? 'bg-secondary text-white shadow-lg shadow-secondary/20' : 'text-text-muted hover:text-white'}`}>Appointments</button>
+        <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-inner">
+           <button onClick={() => setActiveTab('listings')} className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'listings' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>My Listings</button>
+           <button onClick={() => setActiveTab('appointments')} className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${activeTab === 'appointments' ? 'bg-white text-slate-900 shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>Appointments</button>
         </div>
 
         <button 
           onClick={() => setShowForm(!showForm)} 
-          className="btn-primary group flex items-center gap-2 px-6 py-3 rounded-2xl text-sm shadow-xl font-black"
+          className="bg-sky-600 hover:bg-black text-white px-8 py-3 rounded-2xl text-sm shadow-xl font-black transition-all flex items-center gap-3"
         >
           {showForm ? 'CANCEL' : 'LIST NEW PROPERTY'}
           <Plus size={18} className={`transition-transform duration-500 ${showForm ? 'rotate-45' : ''}`} />
         </button>
       </header>
 
-      {/* Add Property Form Modal/Drawer Overlay Logic */}
+      {/* Add Property Form */}
       <AnimatePresence>
         {showForm && (
            <motion.div 
              initial={{ height: 0, opacity: 0 }}
              animate={{ height: 'auto', opacity: 1 }}
              exit={{ height: 0, opacity: 0 }}
-             className="glass overflow-hidden border-primary/20 bg-gradient-to-br from-bg-dark to-primary/5"
+             className="bg-white rounded-[2rem] overflow-hidden border border-slate-200 shadow-2xl"
            >
-              <form onSubmit={handleCreateProperty} className="p-10 grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
+              <form onSubmit={handleCreateProperty} className="p-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="space-y-6 md:col-span-1">
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">House Name & Type</label>
-                    <input type="text" placeholder="Glow Residency / Luxury BHK" required className="input-glass w-full" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Property Name</label>
+                    <input type="text" placeholder="Emerald Office / Luxury Flat" required className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 font-bold" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                       <label className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">House No.</label>
-                       <input type="text" placeholder="B-123" required className="input-glass w-full" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} />
-                    </div>
-                    <div className="space-y-2">
-                       <label className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">Floor</label>
-                       <input type="text" placeholder="4th Floor" required className="input-glass w-full" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} />
-                    </div>
-                  </div>
+                  
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">Location / Address</label>
-                    <div className="relative">
-                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" size={18} />
-                      <input type="text" placeholder="123 Street Name, City, PIN" required className="input-glass w-full pl-10" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Property Type</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      {['House', 'Flat', 'Office', 'Shop', 'Villa'].map(t => (
+                        <button
+                          key={t}
+                          type="button"
+                          onClick={() => setFormData({...formData, type: t})}
+                          className={`py-2 rounded-lg text-xs font-bold border transition-all ${formData.type === t ? 'bg-sky-600 border-sky-600 text-white shadow-md' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'}`}
+                        >
+                          {t}
+                        </button>
+                      ))}
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-6">
+                <div className="space-y-6 md:col-span-1">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Flat/Shop No.</label>
+                        <input type="text" placeholder="B-123" required className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 font-bold" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Floor</label>
+                        <input type="text" placeholder="Gnd / 4th" required className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 font-bold" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Full Location</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                      <input type="text" placeholder="Address, City" required className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 font-bold" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-6 md:col-span-1">
                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                         <label className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">Configuration (BHK)</label>
-                         <select className="input-glass w-full appearance-none" value={formData.bhk} onChange={e => setFormData({...formData, bhk: e.target.value})}>
+                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Config (BHK)</label>
+                         <select className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 font-bold appearance-none" value={formData.bhk} onChange={e => setFormData({...formData, bhk: e.target.value})}>
+                            <option value="N/A">N/A (Comm)</option>
                             <option value="1">1 BHK</option>
                             <option value="2">2 BHK</option>
                             <option value="3">3 BHK</option>
@@ -142,79 +175,91 @@ const TenantDashboard = () => {
                          </select>
                       </div>
                       <div className="space-y-2">
-                         <label className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">Dimensions</label>
-                         <input type="text" placeholder="1200 SqFt" className="input-glass w-full" value={formData.dimensions} onChange={e => setFormData({...formData, dimensions: e.target.value})} />
+                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">SqFt / Area</label>
+                         <input type="text" placeholder="1200" className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-sky-500 font-bold" value={formData.dimensions} onChange={e => setFormData({...formData, dimensions: e.target.value})} />
                       </div>
                    </div>
                    <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">Road / Neighborhood Detail</label>
-                    <input type="text" placeholder="Main Road access, near station" className="input-glass w-full" value={formData.roadInfo} onChange={e => setFormData({...formData, roadInfo: e.target.value})} />
-                   </div>
-                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-text-muted uppercase tracking-widest px-1">Property Visuals (Images)</label>
-                    <div className="border-2 border-dashed border-border-glass rounded-xl p-6 hover:border-primary/50 transition-all flex flex-col items-center gap-4 bg-bg-dark/50">
-                       <Upload className="text-text-muted" size={32} />
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Property Photos</label>
+                    <div className="border-2 border-dashed border-slate-200 rounded-2xl p-4 hover:border-sky-300 transition-all flex flex-col items-center gap-2 bg-slate-50">
+                       <Upload className="text-slate-300" size={24} />
                        <input type="file" multiple className="hidden" id="imgs" onChange={e => setImages(e.target.files)} />
-                       <label htmlFor="imgs" className="cursor-pointer text-sm font-black text-primary hover:underline">UPLOAD PHOTOS</label>
-                       {images.length > 0 && <p className="text-xs text-secondary font-bold uppercase tracking-widest animate-bounce">{images.length} Files Selected</p>}
+                       <label htmlFor="imgs" className="cursor-pointer text-xs font-black text-sky-600 hover:text-sky-700">CLICK TO BROWSE</label>
+                       {images.length > 0 && <p className="text-[10px] text-green-600 font-black uppercase tracking-widest">{images.length} Selected</p>}
                     </div>
                    </div>
                 </div>
 
-                <div className="md:col-span-2 pt-6">
-                   <button type="submit" className="btn-primary w-full py-4 text-sm font-black tracking-widest shadow-2xl">SUBMIT LISTING TO MARKETPLACE</button>
+                <div className="md:col-span-3 pt-4">
+                   <button type="submit" className="w-full py-4 bg-sky-600 hover:bg-black text-white rounded-2xl font-black tracking-widest shadow-xl transition-all">START LISTING PROPERTY</button>
                 </div>
               </form>
            </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Conditional Rendering of Tabs */}
+      {/* Main Content */}
       <AnimatePresence mode="wait">
         {activeTab === 'listings' ? (
            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                  {properties.length > 0 ? properties.map(p => (
-                   <div key={p._id} className="glass group overflow-hidden border-border-glass hover:border-primary/30 transition-all flex flex-col">
-                      <div className="relative h-48 overflow-hidden">
-                        <img src={`http://localhost:5000${p.images[0]}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                   <div key={p._id} className="bg-white group rounded-[2rem] overflow-hidden border border-slate-200 hover:border-sky-300 transition-all flex flex-col shadow-sm hover:shadow-xl">
+                      <div className="relative h-56 overflow-hidden">
+                        <img src={`http://localhost:5000${p.images[0]}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.name} />
+                        <div className="absolute top-4 left-4 flex gap-2">
+                            <span className="bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-slate-900 border border-slate-200 shadow-sm flex items-center gap-1">
+                                {getTypeIcon(p.type)} {p.type}
+                            </span>
+                        </div>
                         <div className="absolute top-4 right-4 flex items-center gap-2">
                           {p.status === 'open' ? 
-                            <span className="bg-green-500/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white">OPEN</span> :
-                            <span className="bg-red-500/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white">BOOKED</span>
+                            <span className="bg-emerald-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-lg">AVAILABLE</span> :
+                            <span className="bg-rose-500 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-lg">BOOKED</span>
                           }
                         </div>
                       </div>
-                      <div className="p-6 space-y-4">
+                      <div className="p-8 space-y-5">
                         <div className="flex justify-between items-start">
                           <div>
-                            <h3 className="font-black text-lg group-hover:text-primary transition-colors">{p.name}</h3>
-                            <p className="text-xs text-text-muted flex items-center gap-1"><MapPin size={12} /> {p.address}</p>
+                            <h3 className="font-black text-xl text-slate-900 group-hover:text-sky-600 transition-colors tracking-tight">{p.name}</h3>
+                            <p className="text-xs text-slate-400 font-bold flex items-center gap-1 mt-1 group-hover:text-slate-600 transition-colors"><MapPin size={12} /> {p.address}</p>
                           </div>
                           <div className="text-right">
-                             <span className="text-xs font-black text-primary bg-primary/10 px-2 py-1 rounded flex items-center gap-1"><Eye size={12} /> {p.views}</span>
+                             <span className="text-[10px] font-black text-sky-600 bg-sky-50 px-2.5 py-1.5 rounded-lg border border-sky-100 flex items-center gap-1 shadow-sm"><Eye size={12} /> {p.views}</span>
                           </div>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-3 pb-2 border-b border-border-glass">
-                           <div className="text-[10px] font-bold text-text-muted uppercase">BHK: <span className="text-white">{p.bhk}</span></div>
-                           <div className="text-[10px] font-bold text-text-muted uppercase">Floor: <span className="text-white">{p.floor}</span></div>
+                        <div className="flex items-center gap-6 py-4 border-y border-slate-100">
+                           <div className="flex flex-col">
+                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Config</span>
+                               <span className="text-sm font-black text-slate-900">{p.bhk === 'N/A' ? 'Comm' : `${p.bhk} BHK`}</span>
+                           </div>
+                           <div className="w-px h-8 bg-slate-100"></div>
+                           <div className="flex flex-col">
+                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Floor</span>
+                               <span className="text-sm font-black text-slate-900">{p.floor}</span>
+                           </div>
+                           <div className="w-px h-8 bg-slate-100"></div>
+                           <div className="flex flex-col">
+                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Area</span>
+                               <span className="text-sm font-black text-slate-900">{p.dimensions || 'N/A'}</span>
+                           </div>
                         </div>
 
-                        <div className="flex gap-2">
-                           <button 
-                             onClick={() => updatePropStatus(p._id, p.status === 'open' ? 'booked' : 'open')}
-                             className={`flex-grow py-3 rounded-xl text-xs font-black tracking-widest uppercase transition-all ${p.status === 'open' ? 'bg-secondary hover:bg-pink-600' : 'bg-green-600 hover:bg-green-700'} shadow-lg`}
-                           >
-                             {p.status === 'open' ? 'Mark as Booked' : 'Mark as Open'}
-                           </button>
-                        </div>
+                        <button 
+                            onClick={() => updatePropStatus(p._id, p.status === 'open' ? 'booked' : 'open')}
+                            className={`w-full py-4 rounded-2xl text-xs font-black tracking-widest uppercase transition-all flex items-center justify-center gap-2 ${p.status === 'open' ? 'bg-slate-900 text-white hover:bg-black' : 'bg-emerald-50 text-emerald-600 border border-emerald-100 hover:bg-emerald-100 shadow-sm'} shadow-lg`}
+                        >
+                            {p.status === 'open' ? <>Mark as Booked</> : <><Check size={16}/> Re-open Listing</>}
+                        </button>
                       </div>
                    </div>
                  )) : (
-                    <div className="col-span-full py-20 text-center glass border-dashed border-2 opacity-50 flex flex-col items-center gap-4">
-                       <Home size={40} className="text-text-muted" />
-                       <p className="font-bold text-text-muted tracking-wide uppercase text-sm">You haven't listed any properties yet</p>
+                    <div className="col-span-full py-32 text-center bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                       <Home size={64} className="mx-auto text-slate-200 mb-4" />
+                       <p className="font-extrabold text-slate-400 tracking-tight text-xl">NO LISTINGS YET</p>
+                       <p className="text-slate-400 font-medium mt-2">Start by clicking 'List New Property' above.</p>
                     </div>
                  )}
               </div>
@@ -224,32 +269,32 @@ const TenantDashboard = () => {
              {appointments.length > 0 ? (
                <div className="space-y-4">
                  {appointments.map(a => (
-                    <div key={a._id} className="glass p-6 border-border-glass flex flex-col md:flex-row justify-between items-center gap-6 group hover:border-primary/40 transition-all">
+                    <div key={a._id} className="bg-white p-6 rounded-3xl border border-slate-200 flex flex-col md:flex-row justify-between items-center gap-6 group hover:border-sky-300 transition-all shadow-sm hover:shadow-md">
                        <div className="flex items-center gap-6 flex-grow">
-                          <div className="bg-bg-dark w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl border border-primary/20">{a.customerId.name[0]}</div>
+                          <div className="bg-slate-900 w-16 h-16 rounded-2xl flex items-center justify-center font-black text-2xl text-white border border-slate-800 shadow-xl">{a.customerId.name[0]}</div>
                           <div className="space-y-1">
                              <div className="flex items-center gap-2">
-                                <h4 className="text-lg font-black group-hover:text-primary transition-colors">{a.customerId.name}</h4>
-                                <span className="text-[10px] font-black text-secondary uppercase bg-secondary/10 px-2 py-0.5 rounded border border-secondary/20 tracking-tighter">Customer</span>
+                                <h4 className="text-xl font-black text-slate-900 group-hover:text-sky-600 transition-colors tracking-tight">{a.customerId.name}</h4>
+                                <span className="text-[10px] font-black text-sky-600 uppercase bg-sky-50 px-2.5 py-1 rounded border border-sky-100 tracking-widest">Customer</span>
                              </div>
-                             <p className="text-sm font-bold text-text-muted flex items-center gap-1 opacity-70"><Clock size={14} /> Request for <span className="text-white underline decoration-primary underline-offset-4">{a.propertyId?.name}</span></p>
-                             <p className="text-xs text-text-muted italic opacity-40">Sent on {new Date(a.requestedDate).toLocaleString()}</p>
+                             <p className="text-sm font-bold text-slate-500 flex items-center gap-1.5"><Clock size={16} className="text-sky-500" /> Interested in <span className="text-slate-900 underline decoration-sky-500/30 underline-offset-4 font-black">{a.propertyId?.name}</span></p>
+                             <p className="text-[10px] text-slate-400 font-black uppercase tracking-tighter">Request Received: {new Date(a.requestedDate).toLocaleDateString()}</p>
                           </div>
                        </div>
 
-                       <div className="flex flex-col md:flex-row items-center gap-4">
+                       <div className="flex items-center gap-3">
                           {a.status === 'pending' ? (
                             <>
-                              <button onClick={() => handleUpdateAppointment(a._id, 'approved')} className="bg-green-500/20 text-green-500 hover:bg-green-500 hover:text-white p-3 rounded-full border border-green-500/20 transition-all" title="Approve"><Check size={20} /></button>
-                              <button onClick={() => handleUpdateAppointment(a._id, 'rejected')} className="bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white p-3 rounded-full border border-red-500/20 transition-all" title="Reject"><X size={20} /></button>
+                              <button onClick={() => handleUpdateAppointment(a._id, 'approved')} className="bg-emerald-500 text-white hover:bg-emerald-600 p-3.5 rounded-2xl shadow-lg transition-all" title="Approve"><Check size={20} /></button>
+                              <button onClick={() => handleUpdateAppointment(a._id, 'rejected')} className="bg-rose-500 text-white hover:bg-rose-600 p-3.5 rounded-2xl shadow-lg transition-all" title="Reject"><X size={20} /></button>
                             </>
                           ) : (
                             <div className="flex items-center gap-4">
-                              <span className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest ${a.status === 'approved' ? 'bg-green-500/10 text-green-500 border border-green-500/20' : 'bg-red-500/10 text-red-500 border border-red-500/20'}`}>
+                              <span className={`px-6 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border ${a.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'}`}>
                                 {a.status}
                               </span>
                               {a.status === 'approved' && (
-                                <button className="btn-primary p-2.5 rounded-xl hover:scale-110 transition-transform">
+                                <button className="bg-sky-600 text-white p-2.5 rounded-2xl hover:scale-110 transition-transform shadow-lg shadow-sky-600/20">
                                    <MessageSquare size={18} />
                                 </button>
                               )}
@@ -257,12 +302,13 @@ const TenantDashboard = () => {
                           )}
                        </div>
                     </div>
-                 ))}
+                  ))}
                </div>
              ) : (
-               <div className="py-20 text-center glass border-dashed border-2 opacity-50 flex flex-col items-center gap-4">
-                  <Calendar size={40} className="text-text-muted" />
-                  <p className="font-bold text-text-muted tracking-wide uppercase text-sm">No appointment requests at the moment</p>
+               <div className="py-32 text-center bg-slate-50 rounded-[3rem] border-2 border-dashed border-slate-200">
+                  <Calendar size={64} className="mx-auto text-slate-200 mb-4" />
+                  <p className="font-extrabold text-slate-400 tracking-tight text-xl uppercase">Clean Slate</p>
+                  <p className="text-slate-400 font-medium mt-2">No showing requests on the calendar yet.</p>
                </div>
              )}
           </motion.div>

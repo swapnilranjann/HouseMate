@@ -23,7 +23,7 @@ export const updateProfile = (data) => api.put('/auth/update-profile', data);
 export const changePassword = (data) => api.put('/auth/change-password', data);
 
 // --- Property APIs ---
-export const getProperties = () => api.get('/properties');
+export const getProperties = (type) => api.get('/properties', { params: { type } });
 export const getPropertyById = async (id) => {
     const { data } = await api.get('/properties');
     return data.find(p => p._id === id);
