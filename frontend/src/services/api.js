@@ -18,9 +18,12 @@ api.interceptors.request.use((config) => {
 // --- Auth APIs ---
 export const loginUser = (data) => api.post('/auth/login', data);
 export const registerUser = (data) => api.post('/auth/register', data);
+export const forgotPassword = (email) => api.post('/auth/forgot-password', { email });
+export const updateProfile = (data) => api.put('/auth/update-profile', data);
+export const changePassword = (data) => api.put('/auth/change-password', data);
 
 // --- Property APIs ---
-export const getProperties = () => api.get('/properties');
+export const getProperties = (type) => api.get('/properties', { params: { type } });
 export const getPropertyById = async (id) => {
     const { data } = await api.get('/properties');
     return data.find(p => p._id === id);
@@ -41,5 +44,9 @@ export const updateAppointmentStatus = (id, status) => api.put(`/appointments/${
 export const getChats = () => api.get('/chats');
 export const getChatDetails = (id) => api.get(`/chats/${id}`);
 export const sendChatMessage = (id, text) => api.post(`/chats/${id}/messages`, { text });
+
+// --- Support APIs ---
+export const createSupportTicket = (data) => api.post('/support', data);
+export const getMyTickets = () => api.get('/support/my-tickets');
 
 export default api;

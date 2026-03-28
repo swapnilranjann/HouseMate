@@ -10,13 +10,18 @@ import PropertyDetail from './pages/PropertyDetail';
 import TenantDashboard from './pages/TenantDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
 import ChatPage from './pages/ChatPage';
+import SupportPage from './pages/SupportPage';
+import ProfilePage from './pages/ProfilePage';
+import ForgotPassword from './pages/ForgotPassword';
 import { useAuth } from './context/AuthContext.jsx';
+import { ToastProvider } from './components/ui/ToastProvider.jsx';
 
 function App() {
   const { user } = useAuth();
 
   return (
     <div className="container min-h-screen py-10">
+      <ToastProvider />
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
@@ -51,6 +56,13 @@ function App() {
         <Route path="/chats/:id" element={
           user ? <ChatPage /> : <Navigate to="/" />
         } />
+        <Route path="/support" element={
+          user ? <SupportPage /> : <Navigate to="/customer/login" />
+        } />
+        <Route path="/profile" element={
+          user ? <ProfilePage /> : <Navigate to="/customer/login" />
+        } />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

@@ -1,104 +1,157 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { Home, LogOut, LayoutDashboard, Heart, MessageSquare, ShieldCheck, UserCircle, Menu, UserPlus, Building, Key } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext.jsx';
+import { Home, LogOut, LayoutDashboard, Heart, MessageSquare, ShieldCheck, UserCircle, Menu, UserPlus, Building, Key, LifeBuoy, Command, ArrowUpRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showDropdown, setShowDropdown] = useState(false);
 
+  const isActive = (path) => {
+    if (path.includes('dashboard')) {
+        return location.pathname.includes('dashboard');
+    }
+    return location.pathname === path || location.pathname.startsWith(`${path}/`);
+  };
+
+  const navLinks = [
+    { to: user?.role === 'tenant' ? '/tenant-dashboard' : '/customer-dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { to: '/chats', icon: MessageSquare, label: 'Messages' },
+    { to: '/support', icon: LifeBuoy, label: 'Help Center' }
+  ];
+
   return (
-    <nav className="bg-white border-b border-gray-200 shadow-[0_4px_20px_-10px_rgba(0,0,0,0.05)] sticky top-0 z-50">
+    <nav className="bg-white/80 backdrop-blur-xl border-b border-slate-100 sticky top-0 z-[100] transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-20 md:h-24">
           
-          {/* Logo */}
-          <Link to="/" className="flex items-center gap-2 decoration-none text-slate-900 font-extrabold text-2xl tracking-tight">
-            <div className="bg-indigo-600 p-2 rounded-xl">
-               <Home className="text-white w-6 h-6 border-2 border-transparent" />
+          {/* Logo Identity */}
+          <Link to="/" className="flex items-center gap-4 group cursor-pointer">
+            <div className="bg-slate-900 p-2.5 rounded-2xl shadow-2xl group-hover:scale-110 group-hover:bg-indigo-600 transition-all duration-500">
+               <Home className="text-white w-6 h-6" />
             </div>
-            <span>HouseMate</span>
+            <div className="flex flex-col">
+              <span className="font-serif font-black text-2xl md:text-3xl tracking-tighter text-slate-900 leading-none uppercase italic-none">HouseMate</span>
+              <span className="text-[8px] font-black uppercase tracking-[0.4em] text-indigo-600 leading-none mt-1.5">Premium Home Service</span>
+            </div>
           </Link>
 
-          {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-8">
+          {/* Desktop Navigation */}
+          <div className="hidden lg:flex items-center gap-10">
             {user ? (
               <>
-                <Link to={user.role === 'tenant' ? '/tenant-dashboard' : '/customer-dashboard'} className="text-sm font-semibold text-slate-600 hover:text-indigo-600 flex items-center gap-2 transition-colors">
-                  <LayoutDashboard size={18} />
-                  <span>Dashboard</span>
-                </Link>
-                
-                {user.role === 'customer' && (
-                  <Link to="/favorites" className="text-sm font-semibold text-slate-600 hover:text-indigo-600 flex items-center gap-2 transition-colors">
-                    <Heart size={18} />
-                    <span>Favorites</span>
-                  </Link>
-                )}
+                <div className="flex items-center gap-8">
+                    {navLinks.map((link, idx) => {
+                        const active = isActive(link.to);
+                        return (
+                            <Link 
+                                key={idx} 
+                                to={link.to} 
+                                className={`text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-3 transition-all group relative py-2 ${active ? 'text-indigo-600' : 'text-slate-400 hover:text-slate-900'}`}
+                            >
+                                <link.icon size={16} className={`transition-all ${active ? 'text-indigo-600 scale-110' : 'group-hover:text-indigo-600 group-hover:-translate-y-1'}`} />
+                                <span className="relative z-10">{link.label}</span>
+                                {active && (
+                                    <motion.div 
+                                        layoutId="nav-active" 
+                                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-indigo-600 rounded-full"
+                                        transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                                    />
+                                )}
+                            </Link>
+                        );
+                    })}
+                </div>
 
-                <Link to="/chats" className="text-sm font-semibold text-slate-600 hover:text-indigo-600 flex items-center gap-2 transition-colors">
-                  <MessageSquare size={18} />
-                  <span>Messages</span>
-                </Link>
-
-                <div className="h-8 w-px bg-gray-200 mx-2"></div>
+                <div className="h-4 w-px bg-slate-100"></div>
                 
-                {/* User Profile */}
-                <div className="flex items-center gap-3 bg-slate-50 px-3 py-2 rounded-full border border-gray-200 shadow-inner">
-                  <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-500 shadow-sm">
-                    {user.role === 'tenant' ? <ShieldCheck size={18} className="text-sky-600" /> : <UserCircle size={18} className="text-indigo-600" />}
-                  </div>
-                  <div className="flex flex-col pr-2">
-                    <span className="text-sm font-bold text-slate-900 leading-tight">{user.name.split(' ')[0]}</span>
-                    <span className="text-[10px] font-black tracking-wider text-slate-500 uppercase">{user.role}</span>
-                  </div>
-                  <button 
-                    onClick={() => { logout(); navigate('/'); }} 
-                    className="ml-2 text-slate-400 hover:text-red-500 p-1.5 rounded-full hover:bg-white transition-all shadow-sm border border-transparent hover:border-red-100"
-                    title="Logout"
-                  >
-                    <LogOut size={16} />
-                  </button>
+                {/* User Identity */}
+                <div className="flex items-center gap-6">
+                    <Link to="/profile" className={`flex items-center gap-4 px-4 py-2 rounded-2xl border transition-all hover:shadow-xl group ${location.pathname === '/profile' ? 'bg-indigo-50 border-indigo-100 shadow-sm' : 'bg-slate-50/50 border-slate-100 hover:bg-white hover:border-indigo-100'}`}>
+                        <div className={`w-9 h-9 rounded-xl border flex items-center justify-center text-white shadow-xl transition-all ${location.pathname === '/profile' || user.role === 'tenant' ? 'bg-indigo-600 border-indigo-400' : 'bg-slate-900 border-slate-800 group-hover:bg-indigo-600'}`}>
+                            {user.role === 'tenant' ? <ShieldCheck size={18} /> : <UserCircle size={18} />}
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="text-xs font-black text-slate-900 leading-none">{user.name.split(' ')[0]}</span>
+                            <span className={`text-[9px] font-black tracking-widest uppercase mt-1 ${location.pathname === '/profile' ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-600'}`}>SECURED {user.role.toUpperCase()}</span>
+                        </div>
+                    </Link>
+
+                    <button 
+                        onClick={() => { logout(); navigate('/'); }} 
+                        className="p-3 bg-slate-50 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all shadow-sm active:scale-95"
+                        title="Log Out"
+                    >
+                        <LogOut size={18} />
+                    </button>
                 </div>
               </>
             ) : (
-              <div className="flex items-center gap-6">
-                
-                {/* Customers */}
-                <div className="flex items-center gap-4">
-                  <div className="flex flex-col text-right mr-2">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Looking for a home?</span>
-                  </div>
-                  <Link to="/customer/login" className="text-sm font-bold text-slate-600 hover:text-indigo-600 transition-colors flex items-center gap-1"><Key size={16}/> Sign In</Link>
-                  <Link to="/customer/register" className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm px-5 py-2.5 rounded-lg font-bold transition-all shadow-md hover:shadow-lg flex items-center gap-2">
-                    <UserPlus size={16} /> Register
+              <div className="flex items-center gap-10">
+                <div className="flex items-center gap-8">
+                  <Link to="/customer/login" className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-slate-900 transition-all">Log In</Link>
+                  <Link to="/customer/register" className="bg-slate-900 hover:bg-black text-white text-[10px] px-8 py-3.5 rounded-2xl font-black uppercase tracking-[0.25em] transition-all shadow-2xl hover:-translate-y-1">
+                    JOIN NOW
                   </Link>
                 </div>
-
-                <div className="h-10 w-px bg-gray-200"></div>
-
-                {/* Tenants/Owners */}
-                <div className="flex items-center gap-4">
-                   <div className="flex flex-col text-right mr-2">
-                    <span className="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Property Owners</span>
-                  </div>
-                  <Link to="/tenant/login" className="text-sm font-bold text-slate-600 hover:text-sky-600 transition-colors flex items-center gap-1"><Key size={16}/> Admin Portal</Link>
-                  <Link to="/tenant/register" className="bg-white border border-gray-300 hover:border-sky-300 hover:bg-sky-50 text-slate-700 hover:text-sky-700 text-sm px-5 py-2.5 rounded-lg font-bold transition-all shadow-sm flex items-center gap-2">
-                    <Building size={16} /> List Property
+                <div className="h-8 w-px bg-slate-100"></div>
+                <div className="flex items-center gap-6">
+                  <Link to="/tenant/login" className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 hover:text-sky-600 transition-all">Admin</Link>
+                  <Link to="/tenant/register" className="bg-white text-sky-600 border border-sky-100 hover:bg-sky-600 hover:text-white text-[10px] px-8 py-3.5 rounded-2xl font-black uppercase tracking-[0.25em] transition-all shadow-sm hover:shadow-xl">
+                    LIST PROPERTY
                   </Link>
                 </div>
-
               </div>
             )}
           </div>
 
-          {/* Mobile Menu Icon */}
-          <button className="md:hidden text-slate-500 p-2 hover:bg-slate-100 rounded-md transition-colors" onClick={() => setShowDropdown(!showDropdown)}>
-            <Menu size={28} />
+          {/* Mobile Access Trigger */}
+          <button className="lg:hidden p-3 bg-slate-50 text-slate-900 rounded-xl hover:bg-slate-100 transition-all" onClick={() => setShowDropdown(!showDropdown)}>
+            <Menu size={24} />
           </button>
         </div>
       </div>
+
+      {/* Mobile Menu Dropdown */}
+      <AnimatePresence>
+        {showDropdown && (
+            <motion.div 
+               initial={{ opacity: 0, height: 0 }} 
+               animate={{ opacity: 1, height: 'auto' }} 
+               exit={{ opacity: 0, height: 0 }}
+               className="lg:hidden bg-white border-t border-slate-100 overflow-hidden"
+            >
+                <div className="p-6 space-y-4">
+                    {user ? (
+                        <>
+                            {navLinks.map((link, idx) => (
+                                <Link 
+                                    key={idx} 
+                                    to={link.to} 
+                                    onClick={() => setShowDropdown(false)} 
+                                    className={`block py-4 text-[10px] font-black uppercase tracking-widest border-b border-slate-50 ${isActive(link.to) ? 'text-indigo-600' : 'text-slate-900'}`}
+                                >
+                                    {link.label}
+                                </Link>
+                            ))}
+                            <Link to="/profile" onClick={() => setShowDropdown(false)} className={`block py-4 text-[10px] font-black uppercase tracking-widest border-b border-slate-50 ${location.pathname === '/profile' ? 'text-indigo-600' : 'text-slate-900'}`}>My Profile</Link>
+                            <button onClick={() => { logout(); navigate('/'); setShowDropdown(false); }} className="w-full text-left py-4 text-[10px] font-black uppercase tracking-widest text-rose-500">Log Out</button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/customer/login" onClick={() => setShowDropdown(false)} className="block py-4 text-[10px] font-black uppercase tracking-widest text-slate-900 border-b border-slate-50">Log In</Link>
+                            <Link to="/customer/register" onClick={() => setShowDropdown(false)} className="block py-4 text-[10px] font-black uppercase tracking-widest text-indigo-600">Create Account</Link>
+                            <Link to="/tenant/login" onClick={() => setShowDropdown(false)} className="block py-4 text-[10px] font-black uppercase tracking-widest text-slate-900 border-b border-slate-50">Admin Log In</Link>
+                            <Link to="/tenant/register" onClick={() => setShowDropdown(false)} className="block py-4 text-[10px] font-black uppercase tracking-widest text-sky-600">List Property</Link>
+                        </>
+                    )}
+                </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 };

@@ -1,21 +1,23 @@
 const jwt = require('jsonwebtoken');
+const response = require('../utils/response');
 
 const auth = (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
-      return res.status(401).json({ message: 'No authentication token, access denied' });
+      return response.unauthorized(res, 'Identity verification failed. No token provided.');
     }
 
     const verified = jwt.verify(token, process.env.JWT_SECRET);
     if (!verified) {
-      return res.status(401).json({ message: 'Token verification failed, access denied' });
+      return response.unauthorized(res, 'Security handshake failed. Invalid or expired session.');
     }
 
     req.user = verified;
     next();
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Auth Middleware Exception:', err.message);
+    response.unauthorized(res, 'Session synchronisation failure. Please log in again.');
   }
 };
 

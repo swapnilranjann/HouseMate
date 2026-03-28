@@ -20,6 +20,15 @@ router.post('/', auth, async (req, res) => {
       status: 'pending',
     });
     await appointment.save();
+
+    // Create a skeleton chat IMMEDIATELY
+    const newChat = new Chat({
+      appointmentId: appointment._id,
+      participants: [appointment.customerId, appointment.tenantId],
+      messages: [],
+    });
+    await newChat.save();
+
     res.status(201).json(appointment);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -40,19 +49,6 @@ router.put('/:id', auth, async (req, res) => {
 
     appointment.status = status;
     await appointment.save();
-
-    // If approved, create a skeleton chat
-    if (status === 'approved') {
-      const existingChat = await Chat.findOne({ appointmentId: appointment._id });
-      if (!existingChat) {
-        const newChat = new Chat({
-          appointmentId: appointment._id,
-          participants: [appointment.customerId, appointment.tenantId],
-          messages: [],
-        });
-        await newChat.save();
-      }
-    }
 
     res.json(appointment);
   } catch (err) {

@@ -1,62 +1,88 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { MapPin, ArrowRight, ShieldCheck, Home, Building, Briefcase, ShoppingBag, Eye, Camera, Clock, MessageSquare } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { MapPin, Eye, ExternalLink, Activity } from 'lucide-react';
 
 const PropertyCard = ({ property }) => {
+  const getTypeIcon = (type) => {
+    switch (type) {
+      case 'Office': return <Briefcase size={14} />;
+      case 'Shop': return <ShoppingBag size={14} />;
+      case 'Flat': return <Building size={14} />;
+      default: return <Home size={14} />;
+    }
+  };
+
+  if (!property) return null;
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow flex flex-col h-[400px]">
-      
-      {/* Standard Image Area */}
-      <div className="relative h-56 w-full bg-gray-100 flex-shrink-0">
+    <motion.div 
+      whileHover={{ y: -10 }}
+      className="bg-white rounded-[2.5rem] border border-slate-100 overflow-hidden group hover:shadow-2xl transition-all duration-500 hover:border-indigo-100 flex flex-col relative h-full"
+    >
+      {/* Visual Identity */}
+      <div className="relative h-72 overflow-hidden">
         <img 
-          src={property.images?.[0] ? `http://localhost:5000${property.images[0]}` : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800'} 
+          src={`http://localhost:5000${property.images?.[0]}`} 
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
           alt={property.name} 
-          className="w-full h-full object-cover"
         />
         
-        {/* Simple Tags */}
-        <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded text-xs font-bold text-gray-800 shadow-sm border border-gray-100 uppercase tracking-wide">
-          {property.bhk} BHK
+        {/* Verification Architecture */}
+        <div className="absolute top-6 left-6 flex flex-col gap-2">
+            <span className="bg-white/95 backdrop-blur-md px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-slate-900 shadow-xl flex gap-2 items-center leading-none border border-white/50">
+                {getTypeIcon(property.type)} {property.type || 'House'}
+            </span>
+            <span className="bg-slate-900/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest text-emerald-400 self-start border border-white/10 shadow-2xl flex items-center gap-1.5 leading-none">
+                <ShieldCheck size={12} /> Verified Home
+            </span>
+        </div>
+
+        {/* Real-time Telemetry */}
+        <div className="absolute bottom-6 right-6 flex gap-2">
+            <div className="bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2 border border-white/50">
+                <Camera size={14} className="text-indigo-600" />
+                <span className="text-[10px] font-black text-slate-900 leading-none">{property.images?.length || 0} Photos</span>
+            </div>
         </div>
       </div>
 
-      <div className="p-5 flex flex-col flex-grow">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-xl font-bold text-gray-900 truncate pr-4">
-            {property.name}
-          </h3>
-          <div className="flex items-center text-xs font-semibold text-green-700 bg-green-50 px-2 py-1 rounded border border-green-100 mt-1 whitespace-nowrap">
-            {property.status || 'Active'}
-          </div>
-        </div>
-        
-        <p className="text-gray-500 text-sm flex items-center gap-1.5 mb-4 line-clamp-1">
-          <MapPin size={16} className="text-gray-400 shrink-0" /> 
-          {property.address}
+      <div className="p-8 grow flex flex-col">
+        <h3 className="text-2xl md:text-3xl font-serif font-black text-slate-900 group-hover:text-indigo-600 transition-colors mb-2 truncate uppercase italic-none">
+          {property.name}
+        </h3>
+        <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 mb-8 leading-none">
+          <MapPin size={14} className="text-sky-500" /> {property.address}
         </p>
 
-        {/* Specs Table */}
-        <div className="flex items-center justify-between text-xs text-gray-500 py-3 border-y border-gray-100 mt-auto mb-4 bg-gray-50/50 px-3 rounded-md">
-            <div className="flex flex-col">
-              <span className="font-semibold text-gray-400">Floor</span>
-              <span className="text-gray-900 font-bold">{property.floor}</span>
+        {/* Global Specs Area */}
+        <div className="grid grid-cols-2 gap-3 mb-8">
+            <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-50 flex flex-col items-center">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none text-center">Config</span>
+                <span className="text-xs font-black text-slate-900">{property.bhk === 'N/A' ? 'COMM' : `${property.bhk} BHK`}</span>
             </div>
-            <div className="flex flex-col text-right">
-              <span className="font-semibold text-gray-400">Listed</span>
-              <span className="text-gray-900 font-bold">{new Date(property.createdAt).toLocaleDateString()}</span>
+            <div className="p-4 bg-slate-50/50 rounded-2xl border border-slate-50 flex flex-col items-center">
+                <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none text-center">Area SqFt</span>
+                <span className="text-xs font-black text-slate-900">{property.dimensions || 'N/A'}</span>
             </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-gray-400 flex items-center gap-1 font-medium">
-            <Eye size={16} /> {property.views || 0}
-          </div>
-          <Link to={`/property/${property._id}`} className="bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm px-4 py-2 rounded-lg transition-colors flex items-center gap-1.5 shadow-sm">
-            Details <ExternalLink size={16} />
-          </Link>
+        <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
+            <div className="flex flex-col">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">Status</span>
+                <span className={`text-[10px] font-black uppercase tracking-widest leading-none ${property.status === 'open' ? 'text-emerald-500' : 'text-rose-500'}`}>
+                    Available Now
+                </span>
+            </div>
+            <Link 
+              to={`/property/${property._id}`} 
+              className="bg-slate-900 hover:bg-black text-white px-8 py-3.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-2xl transition-all hover:scale-105 flex items-center gap-2"
+            >
+              View Details <ArrowRight size={14} />
+            </Link>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

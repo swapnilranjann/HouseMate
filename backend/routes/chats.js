@@ -10,7 +10,7 @@ router.get('/', auth, async (req, res) => {
     const filter = { participants: req.user.id };
     const chats = await Chat.find(filter)
       .populate('appointmentId')
-      .populate('participants', 'name email');
+      .populate('participants', 'name email role');
     res.json(chats);
   } catch (err) {
     res.status(500).json({ error: err.message });

@@ -35,10 +35,13 @@ router.post('/', auth, upload.array('images', 5), async (req, res) => {
   }
 });
 
-// Get All Properties
+// Get All Properties (with filtering)
 router.get('/', async (req, res) => {
   try {
-    const properties = await Property.find({}).populate('listerId', 'name email');
+    const { type } = req.query;
+    const query = type && type !== 'All' ? { type } : {};
+    
+    const properties = await Property.find(query).populate('listerId', 'name email');
     res.json(properties);
   } catch (err) {
     res.status(500).json({ error: err.message });

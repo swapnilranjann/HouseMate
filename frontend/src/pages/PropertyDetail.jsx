@@ -1,29 +1,32 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { getProperties, incrementPropertyView, favoriteProperty, requestAppointment } from '../services/api';
-import { Heart, MapPin, Home as HomeIcon, Eye, Calendar, User, LayoutGrid, ShieldCheck, Share2, MessageSquare, ChevronLeft, ChevronRight, Navigation } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { motion } from 'framer-motion';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { getPropertyById, requestAppointment, incrementPropertyView, getMyAppointments, getChats } from '../services/api';
+import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building, Lock, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { useAuth } from '../context/AuthContext.jsx';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const PropertyDetail = () => {
   const { id } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [requestStatus, setRequestStatus] = useState('');
-  const [mainImage, setMainImage] = useState(0);
+  const [requestStatus, setRequestStatus] = useState('idle');
+  const [existingChatId, setExistingChatId] = useState(null);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [showLightbox, setShowLightbox] = useState(false);
 
   useEffect(() => {
     fetchProperty();
-    incrementView();
-  }, [id]);
+    incrementPropertyView(id);
+    if (user) checkExistingStatus();
+  }, [id, user]);
 
   const fetchProperty = async () => {
     try {
-      const { data } = await getProperties();
-      const selected = data.find(p => p._id === id);
-      setProperty(selected);
+      const data = await getPropertyById(id);
+      setProperty(data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -31,172 +34,254 @@ const PropertyDetail = () => {
     }
   };
 
-  const incrementView = async () => {
+  const checkExistingStatus = async (forceInquiryResult = null) => {
     try {
-      if (id) await incrementPropertyView(id);
-    } catch (err) {
-      console.error(err);
-    }
-  };
+        const [aRes, cRes] = await Promise.all([getMyAppointments(), getChats()]);
+        const appt = aRes.data.find(a => String(a.propertyId?._id) === String(id));
+        
+        if (appt) setRequestStatus(appt.status);
+        else if (forceInquiryResult) setRequestStatus('pending');
 
-  const handleFavorite = async () => {
-    if (!user) return navigate('/customer/login');
-    try {
-      await favoriteProperty(id);
-      alert('Added to favorites!');
+        const chat = cRes.data.find(c => 
+            String(c.appointmentId?._id) === String(appt?._id) || 
+            String(c.appointmentId?._id || c.appointmentId) === String(appt?._id || forceInquiryResult?._id)
+        );
+        if (chat) {
+            setExistingChatId(chat._id);
+            return chat._id;
+        }
+        return null;
     } catch (err) {
-      alert('Error adding to favorites');
+        console.error("Discovery Error:", err);
+        return null;
     }
   };
 
   const handleRequestAppointment = async () => {
     if (!user) return navigate('/customer/login');
     try {
-      await requestAppointment(id);
-      setRequestStatus('sent');
-      alert('Appointment request sent successfully!');
+      const res = await requestAppointment(id);
+      setRequestStatus('pending');
+      toast.success('Inquiry transmitted! Linking secure channel...');
+      // Instant sync
+      await checkExistingStatus(res.data);
     } catch (err) {
-      alert(err.response?.data?.message || 'Error requesting appointment');
+      toast.error(err.response?.data?.message || 'Transaction error');
     }
   };
 
-  if (loading) return <div className="py-20 text-center font-bold text-primary animate-pulse">Loading property details...</div>;
-  if (!property) return <div className="py-20 text-center text-text-muted">Property not found.</div>;
+  const handleMessageTap = async () => {
+     if (!user) return navigate('/customer/login');
+     
+     if (requestStatus === 'rejected') {
+        return toast.error('This inquiry was denied. Communication is blocked.');
+     }
+
+     if (existingChatId) {
+        return navigate(`/chats/${existingChatId}`);
+     }
+
+     if (requestStatus === 'pending' || requestStatus === 'approved') {
+        const tid = toast.loading('Syncing secure frequency...');
+        const cid = await checkExistingStatus();
+        if (cid) {
+           toast.success('Frequency established.', { id: tid });
+           navigate(`/chats/${cid}`);
+        } else {
+           toast.error('Channel routing to general hub.', { id: tid });
+           navigate('/chats');
+        }
+        return;
+     }
+
+     toast.error('Submit an inspection request first to open a direct channel.');
+  };
+
+  if (loading) return <div className="h-screen flex items-center justify-center animate-pulse text-indigo-600 font-serif italic text-xl">Establishing secure link...</div>;
+  if (!property) return <div className="text-center p-20 text-slate-400 font-serif">Asset Frequency Lost.</div>;
+
+  const allImages = property.images || [];
 
   return (
-    <div className="space-y-12 pb-24">
-      {/* Visual Header */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[600px]">
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          className="md:col-span-2 relative group overflow-hidden rounded-3xl"
-        >
-          <img 
-            src={`http://localhost:5000${property.images?.[mainImage] || '/placeholder.jpg'}`} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
-            alt={property.name}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-dark/80 via-transparent to-transparent"></div>
-          <div className="absolute bottom-8 left-8 space-y-2">
-            <h1 className="text-4xl md:text-5xl font-black text-white leading-tight drop-shadow-lg">{property.name}</h1>
-            <p className="flex items-center gap-2 text-white/90 font-medium font-bold">
-               <MapPin className="text-secondary shrink-0" size={20} /> {property.address}
-            </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      
+      {/* Lightbox / Full Gallery Overlay */}
+      <AnimatePresence>
+        {showLightbox && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex flex-col p-10">
+                 <div className="flex justify-between items-center mb-10">
+                    <div className="text-white">
+                        <h2 className="text-3xl font-serif italic font-black uppercase tracking-tighter italic">Portfolio Expansion</h2>
+                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Viewing selection {activeImageIdx + 1} of {allImages.length}</p>
+                    </div>
+                    <button onClick={() => setShowLightbox(false)} className="p-4 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all">
+                        <X size={24} />
+                    </button>
+                 </div>
+                 
+                 <div className="flex-1 flex items-center justify-center relative">
+                    <button onClick={() => setActiveImageIdx(prev => (prev > 0 ? prev - 1 : allImages.length - 1))} className="absolute left-0 p-6 bg-white/5 text-white rounded-full hover:bg-white/10 transition-all -translate-x-1/2 md:translate-x-0">
+                        <ChevronLeft size={32} />
+                    </button>
+                    
+                    <motion.img 
+                        key={activeImageIdx}
+                        initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        src={`http://localhost:5000${allImages[activeImageIdx]}`} 
+                        className="max-h-[70vh] rounded-[3rem] shadow-2xl object-contain"
+                    />
+
+                    <button onClick={() => setActiveImageIdx(prev => (prev < allImages.length - 1 ? prev + 1 : 0))} className="absolute right-0 p-6 bg-white/5 text-white rounded-full hover:bg-white/10 transition-all translate-x-1/2 md:translate-x-0">
+                        <ChevronRight size={32} />
+                    </button>
+                 </div>
+
+                 <div className="mt-10 flex gap-4 overflow-x-auto custom-scrollbar pb-6 px-10">
+                    {allImages.map((img, i) => (
+                        <button key={i} onClick={() => setActiveImageIdx(i)} className={`w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all shrink-0 ${activeImageIdx === i ? 'border-indigo-500 scale-110' : 'border-white/5'}`}>
+                            <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover" alt="Thumb" />
+                        </button>
+                    ))}
+                 </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex justify-between items-center mb-10">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-black text-[10px] uppercase tracking-widest leading-none">
+              <ChevronLeft size={16} /> Return to Portfolio
+          </button>
+          <div className="flex items-center gap-4 text-slate-400 text-[10px] uppercase tracking-widest font-black">
+              <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full leading-none">
+                  <Eye size={12} /> {property.views || 0} Market Views
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full leading-none">
+                  <ImageIcon size={12} /> {allImages.length} Visuals
+              </span>
           </div>
-        </motion.div>
+      </div>
 
-        <div className="flex flex-col gap-4">
-          {property.images?.map((img, idx) => (
-             <motion.div 
-               key={idx}
-               initial={{ opacity: 0, y: 20 }}
-               animate={{ opacity: 1, y: 0 }}
-               transition={{ delay: idx * 0.1 }}
-               className={`h-1/4 rounded-2xl overflow-hidden cursor-pointer border-2 transition-all ${mainImage === idx ? 'border-primary' : 'border-transparent'}`}
-               onClick={() => setMainImage(idx)}
-             >
-               <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover hover:opacity-80" alt={`Thumbnail ${idx}`} />
-             </motion.div>
-          ))}
-          {!property.images[1] && [1,2,3].map(i => (
-             <div key={i} className="h-1/4 bg-bg-card rounded-2xl border border-border-glass/50 flex items-center justify-center">
-               <Share2 size={24} className="opacity-10" />
-             </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Main Content Info */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        <div className="lg:col-span-2 space-y-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="glass p-6 text-center space-y-2 group hover:bg-primary/5 transition-all">
-               <div className="bg-primary/20 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto transition-transform group-hover:scale-110"><HomeIcon className="text-primary" size={24} /></div>
-               <p className="text-[10px] uppercase tracking-widest font-black text-text-muted">Type</p>
-               <p className="font-bold text-xl">{property.bhk} BHK</p>
-            </div>
-            <div className="glass p-6 text-center space-y-2 group hover:bg-secondary/5 transition-all">
-               <div className="bg-secondary/20 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto transition-transform group-hover:scale-110"><LayoutGrid className="text-secondary" size={24} /></div>
-               <p className="text-[10px] uppercase tracking-widest font-black text-text-muted">Floor</p>
-               <p className="font-bold text-xl">{property.floor}</p>
-            </div>
-            <div className="glass p-6 text-center space-y-2">
-               <div className="bg-primary/20 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto transition-transform group-hover:scale-110"><Share2 className="text-primary" size={24} /></div>
-               <p className="text-[10px] uppercase tracking-widest font-black text-text-muted">Area</p>
-               <p className="font-bold text-xl">{property.dimensions || 'N/A'}</p>
-            </div>
-            <div className="glass p-6 text-center space-y-2">
-               <div className="bg-pink-500/20 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto transition-transform group-hover:scale-110"><Navigation className="text-pink-500" size={24} /></div>
-               <p className="text-[10px] uppercase tracking-widest font-black text-text-muted">Road Info</p>
-               <p className="font-bold text-xl">{property.roadInfo || 'Main Road'}</p>
-            </div>
-          </div>
-
-          <section className="glass p-8 space-y-6">
-            <div className="flex justify-between items-center border-b border-border-glass pb-6">
-               <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-accent-gradient p-[2px]"><div className="w-full h-full rounded-full bg-bg-dark flex items-center justify-center font-black text-xl">L</div></div>
-                  <div>
-                    <h4 className="text-xl font-bold">Lister Details</h4>
-                    <p className="text-sm text-text-muted flex items-center gap-2"><ShieldCheck size={14} className="text-primary" /> Verified Trusted Owner</p>
-                  </div>
-               </div>
-               <div className="flex gap-4">
-                  <button onClick={handleFavorite} className="p-4 rounded-full glass hover:bg-secondary/10 hover:text-secondary hover:border-secondary transition-all" title="Bookmark"><Heart size={20} /></button>
-               </div>
-            </div>
-
-            <div className="space-y-4 pt-4">
-               <h3 className="text-2xl font-black">Property Description</h3>
-               <p className="text-text-muted leading-loose">
-                 Discover a haven of luxury and comfort. This {property.bhk} BHK property located at {property.address} 
-                 offers state-of-the-art facilities and a premier living experience. Perfect for families looking 
-                 for a modern lifestyle with all essential amenities at their doorstep. 
-                 The {property.floor} floor location ensures great ventilation and sunlight.
-               </p>
-            </div>
-          </section>
-        </div>
-
-        {/* Sidebar Sticky Box */}
-        <aside className="lg:col-span-1">
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="glass p-8 sticky top-28 border-primary/20 space-y-8 bg-gradient-to-br from-bg-card to-bg-dark">
-             <div className="flex justify-between items-start">
-               <div>
-                 <p className="text-[10px] uppercase tracking-[4px] font-black text-primary mb-1">Status</p>
-                 <span className={`px-4 py-1 rounded-full text-xs font-bold uppercase ${property.status === 'open' ? 'bg-green-500/20 text-green-500' : 'bg-red-500/20 text-red-500'}`}>
-                   {property.status === 'open' ? 'Available' : 'Booked'}
-                 </span>
-               </div>
-               <div className="text-right">
-                 <p className="text-[10px] uppercase tracking-[4px] font-black text-secondary mb-1">Interest</p>
-                 <span className="flex items-center gap-1 font-black text-sm"><Eye size={14} /> {property.views} views</span>
-               </div>
-             </div>
-
-             <div className="h-[1px] bg-border-glass"></div>
-
-             {user?.role === 'customer' ? (
-                <button 
-                  onClick={handleRequestAppointment}
-                  disabled={requestStatus === 'sent' || property.status === 'booked'}
-                  className={`btn-primary w-full py-5 rounded-2xl flex items-center justify-center gap-3 font-black text-base shadow-2xl transition-all ${requestStatus === 'sent' || property.status === 'booked' ? 'opacity-50 grayscale' : 'hover:scale-105'}`}
+      <div className="flex flex-col lg:flex-row gap-12">
+        <div className="grow space-y-12">
+            
+            {/* Interactive Hero Gallery Grid */}
+            <div className="grid grid-cols-4 gap-4 h-[600px]">
+                <div 
+                    onClick={() => { setActiveImageIdx(0); setShowLightbox(true); }}
+                    className="col-span-4 md:col-span-3 rounded-[3rem] overflow-hidden relative group shadow-2xl cursor-pointer"
                 >
-                  {requestStatus === 'sent' ? 'REQUEST SENT' : property.status === 'booked' ? 'ALREADY BOOKED' : 'BOOK AN APPOINTMENT'}
-                  <Calendar size={20} />
-                </button>
-             ) : user?.role === 'tenant' ? (
-                <div className="bg-yellow-500/10 p-4 rounded-xl border border-yellow-500/20 text-yellow-500 text-xs text-center font-bold uppercase tracking-widest">
-                  YOU ARE THE OWNER
+                    <img src={`http://localhost:5000${allImages[0]}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={property.name} />
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent p-12">
+                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white rounded-full text-[9px] font-black tracking-widest uppercase mb-4 shadow-xl">Verified Offering</div>
+                         <h1 className="text-4xl md:text-6xl font-serif italic text-white font-black tracking-tighter italic">{property.name}</h1>
+                         <p className="text-white/70 font-bold text-sm mt-2 flex items-center gap-2"><MapPin size={16} className="text-sky-400" /> {property.address}</p>
+                    </div>
                 </div>
-             ) : (
-                <button onClick={() => navigate('/customer/login')} className="btn-primary w-full py-5 rounded-2xl font-black shadow-2xl">
-                  LOGIN TO BOOK APPOINTMENT
-                </button>
-             )}
-          </motion.div>
-        </aside>
+
+                <div className="hidden md:flex flex-col gap-4">
+                    {allImages.slice(1, 4).map((img, i) => (
+                        <div 
+                            key={i} 
+                            onClick={() => { setActiveImageIdx(i+1); setShowLightbox(true); }}
+                            className="flex-1 rounded-[2.5rem] overflow-hidden shadow-xl group cursor-pointer border border-white relative"
+                        >
+                            <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Spec View" />
+                            {i === 2 && allImages.length > 4 && (
+                                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center text-white flex-col gap-1 transition-all group-hover:bg-slate-900/80">
+                                   <span className="text-2xl font-serif italic font-black">+{allImages.length - 4}</span>
+                                   <span className="text-[9px] font-black uppercase tracking-widest">Expansion</span>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Spec Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {[
+                    { label: 'Type', value: property.type, icon: Layout, color: 'text-indigo-600' },
+                    { label: 'Configuration', value: property.bhk + ' BHK', icon: Bed, color: 'text-sky-500' },
+                    { label: 'Floor Level', value: property.floor, icon: Building, color: 'text-rose-500' },
+                    { label: 'Area Details', value: (property.dimensions || '800') + ' SqFt', icon: MapIcon, color: 'text-emerald-500' }
+                ].map((spec, i) => (
+                    <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all">
+                         <div className={`p-4 rounded-2xl bg-slate-50 mb-4 ${spec.color} shadow-sm`}><spec.icon size={24} /></div>
+                         <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">{spec.label}</span>
+                         <span className="text-lg font-black text-slate-900">{spec.value}</span>
+                    </div>
+                ))}
+            </div>
+
+            {/* Description Area */}
+            <div className="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-12 opacity-[0.02] -rotate-12 translate-x-10 translate-y-10">
+                    <Layout size={200} />
+                </div>
+                <div className="flex items-center gap-3 mb-8">
+                   <div className="h-10 w-1.5 bg-indigo-600 rounded-full"></div>
+                   <h2 className="text-4xl font-serif italic text-slate-900 font-black italic">Property Description</h2>
+                </div>
+                <p className="text-slate-500 text-lg leading-relaxed font-normal">
+                    Step into a masterpiece of modern architecture. This {property.bhk} BHK {property.type} situated at {property.address} is the epitome of refined living. Boasting a strategic location on the {property.floor} floor, this space has been designed with premium high-end aesthetics and maximum utility in mind.
+                </p>
+                
+                {property.locationLink && (
+                    <div className="mt-12 p-8 bg-indigo-50 border border-indigo-100 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div>
+                            <h4 className="text-indigo-900 font-serif italic font-black text-xl mb-1 italic">Location Intelligence</h4>
+                            <p className="text-indigo-600 text-xs font-bold uppercase tracking-widest">Verify coordinates via Google Maps Protocol</p>
+                        </div>
+                        <a href={property.locationLink} target="_blank" rel="noreferrer" className="bg-indigo-600 text-white px-8 py-4 rounded-2xl flex items-center gap-3 text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-black transition-all hover:-translate-y-1">OPEN MAPS <ExternalLink size={16} /></a>
+                    </div>
+                )}
+            </div>
+        </div>
+
+        {/* Action Sidebar */}
+        <div className="w-full lg:w-96 shrink-0">
+            <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-2xl p-10 lg:sticky lg:top-24">
+                <div className="flex justify-between items-center mb-10">
+                   <div>
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Market Status</p>
+                       <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${property.status === 'open' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+                           {property.status === 'open' ? 'Ready for Possession' : 'Occupied'}
+                       </span>
+                   </div>
+                   <div className="text-right">
+                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Metrics</p>
+                       <div className="flex items-center gap-2 text-indigo-600 font-black"><Eye size={16} /> <span className="text-sm">{property.views || 0}</span></div>
+                   </div>
+                </div>
+
+                <div className="space-y-6">
+                    {requestStatus === 'idle' ? (
+                        <button onClick={handleRequestAppointment} className="w-full bg-slate-900 hover:bg-black text-white py-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] shadow-2xl transition-all hover:-translate-y-1">Request Inspection</button>
+                    ) : ( 
+                        <div className={`w-full py-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-center shadow-inner border flex items-center justify-center gap-3 ${
+                            requestStatus === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+                            requestStatus === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
+                        }`}>
+                            {requestStatus === 'pending' && <><Clock size={16}/> INQUIRY SENT</>}
+                            {requestStatus === 'approved' && <><ShieldCheck size={16}/> VISIT SECURED</>}
+                            {requestStatus === 'rejected' && <><Lock size={16}/> REQUEST DENIED</>}
+                        </div>
+                    )}
+                    
+                    <div className="flex items-center gap-4">
+                        <button 
+                            onClick={handleMessageTap}
+                            className={`p-4 rounded-xl shadow-sm transition-all border flex-1 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest min-h-[56px] ${
+                                existingChatId && requestStatus !== 'rejected' ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-black' : 'bg-white text-slate-400 border-slate-200 hover:text-slate-900'
+                            }`}
+                        >
+                            <MessageSquare size={18} /> {existingChatId && requestStatus !== 'rejected' ? 'ENTER CHAT' : 'CHANNELS'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
       </div>
     </div>
   );
