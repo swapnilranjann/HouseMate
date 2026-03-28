@@ -47,6 +47,12 @@ const Navbar = () => {
                   <span>Support</span>
                 </Link>
 
+                {user.role === 'tenant' && (
+                  <Link to="/tenant-dashboard?add=true" className="bg-sky-50 text-sky-600 border border-sky-100 hover:bg-sky-600 hover:text-white px-5 py-2.5 rounded-xl text-sm font-black transition-all shadow-sm flex items-center gap-2">
+                     <Building size={16} /> List Property
+                  </Link>
+                )}
+
                 <div className="h-8 w-px bg-gray-200 mx-2"></div>
                 
                 {/* User Profile */}
