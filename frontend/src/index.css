@@ -1,0 +1,35 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary: #2563eb;
+  --secondary: #64748b;
+  --bg-main: #f8fafc;
+  --text-main: #0f172a;
+  --border-color: #e2e8f0;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.btn-primary {
+  @apply bg-primary hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors shadow-sm;
+}
+
+.btn-secondary {
+  @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-md border border-gray-300 transition-colors shadow-sm;
+}
+
+.input-field {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow bg-white text-gray-900;
+}
+
+.card {
+  @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden;
+}
