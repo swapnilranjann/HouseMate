@@ -50,7 +50,7 @@ const Navbar = () => {
                 <div className="h-8 w-px bg-gray-200 mx-2"></div>
                 
                 {/* User Profile */}
-                <div className="flex items-center gap-3 bg-slate-50 px-3 py-2 rounded-full border border-gray-200 shadow-inner">
+                <Link to="/profile" className="flex items-center gap-3 bg-slate-50 px-3 py-2 rounded-full border border-gray-200 shadow-inner hover:bg-white transition-all hover:border-indigo-100 hover:shadow-md cursor-pointer">
                   <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-500 shadow-sm">
                     {user.role === 'tenant' ? <ShieldCheck size={18} className="text-sky-600" /> : <UserCircle size={18} className="text-indigo-600" />}
                   </div>
@@ -58,14 +58,14 @@ const Navbar = () => {
                     <span className="text-sm font-bold text-slate-900 leading-tight">{user.name.split(' ')[0]}</span>
                     <span className="text-[10px] font-black tracking-wider text-slate-500 uppercase">{user.role}</span>
                   </div>
-                  <button 
-                    onClick={() => { logout(); navigate('/'); }} 
-                    className="ml-2 text-slate-400 hover:text-red-500 p-1.5 rounded-full hover:bg-white transition-all shadow-sm border border-transparent hover:border-red-100"
-                    title="Logout"
-                  >
-                    <LogOut size={16} />
-                  </button>
-                </div>
+                </Link>
+                <button 
+                  onClick={() => { logout(); navigate('/'); }} 
+                  className="ml-2 text-slate-400 hover:text-red-500 p-1.5 rounded-full hover:bg-white transition-all shadow-sm border border-transparent hover:border-red-100"
+                  title="Logout"
+                >
+                  <LogOut size={16} />
+                </button>
               </>
             ) : (
               <div className="flex items-center gap-6">
