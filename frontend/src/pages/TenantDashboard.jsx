@@ -196,10 +196,15 @@ const TenantDashboard = () => {
                     <div key={p._id} className="bg-white rounded-[2.5rem] border border-slate-200 overflow-hidden group hover:shadow-2xl transition-all duration-500 hover:border-sky-100 flex flex-col">
                         <div className="relative h-64 overflow-hidden">
                             <img src={`http://localhost:5000${p.images[0]}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={p.name} />
-                            <div className="absolute top-6 left-6">
+                            <div className="absolute top-6 left-6 flex flex-col gap-2">
                                 <span className="bg-white/90 backdrop-blur-md px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] text-slate-900 shadow-xl border border-white/50 flex gap-2 items-center leading-none">
                                     {getTypeIcon(p.type)} {p.type || 'House'}
                                 </span>
+                                {p.images?.length > 1 && (
+                                    <span className="bg-slate-900/80 backdrop-blur-md px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest text-indigo-300 border border-white/10 self-start leading-none">
+                                        {p.images.length} Media Assets
+                                    </span>
+                                )}
                             </div>
                         </div>
                         <div className="p-8 grow flex flex-col">

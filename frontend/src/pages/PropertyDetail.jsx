@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getPropertyById, requestAppointment, incrementPropertyView, getMyAppointments, getChats } from '../services/api';
-import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building, Lock } from 'lucide-react';
+import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building, Lock, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const PropertyDetail = () => {
@@ -13,6 +14,8 @@ const PropertyDetail = () => {
   const [loading, setLoading] = useState(true);
   const [requestStatus, setRequestStatus] = useState('idle');
   const [existingChatId, setExistingChatId] = useState(null);
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
+  const [showLightbox, setShowLightbox] = useState(false);
 
   useEffect(() => {
     fetchProperty();
@@ -39,7 +42,6 @@ const PropertyDetail = () => {
         if (appt) setRequestStatus(appt.status);
         else if (forceInquiryResult) setRequestStatus('pending');
 
-        // Look for chat linked to this property's appointment
         const chat = cRes.data.find(c => c.appointmentId?._id === appt?._id || c.appointmentId === (appt?._id || forceInquiryResult?._id));
         if (chat) setExistingChatId(chat._id);
     } catch (err) {
@@ -53,7 +55,6 @@ const PropertyDetail = () => {
       const res = await requestAppointment(id);
       setRequestStatus('pending');
       toast.success('Inquiry transmitted! Instant channel established.');
-      // Re-sync status to get the CID immediately
       setTimeout(() => checkExistingStatus(res.data), 500);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Transaction error');
@@ -67,7 +68,6 @@ const PropertyDetail = () => {
      } else if (requestStatus === 'rejected') {
         toast.error('This inquiry was denied. Communication is blocked.');
      } else if (requestStatus === 'pending') {
-        // If we have an inquiry but no chat ID synced yet, try to find it
         checkExistingStatus();
         toast('Establishing secure frequency... try again in a moment.', { icon: '📡' });
      } else {
@@ -78,31 +78,80 @@ const PropertyDetail = () => {
   if (loading) return <div className="h-screen flex items-center justify-center animate-pulse text-indigo-600 font-serif italic text-xl">Establishing secure link...</div>;
   if (!property) return <div className="text-center p-20 text-slate-400 font-serif">Asset Frequency Lost.</div>;
 
+  const allImages = property.images || [];
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       
-      {/* Navigation & Status Header */}
+      {/* Lightbox / Full Gallery Overlay */}
+      <AnimatePresence>
+        {showLightbox && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex flex-col p-10">
+                 <div className="flex justify-between items-center mb-10">
+                    <div className="text-white">
+                        <h2 className="text-3xl font-serif italic font-black uppercase tracking-tighter italic">Portfolio Expansion</h2>
+                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Viewing selection {activeImageIdx + 1} of {allImages.length}</p>
+                    </div>
+                    <button onClick={() => setShowLightbox(false)} className="p-4 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all">
+                        <X size={24} />
+                    </button>
+                 </div>
+                 
+                 <div className="flex-1 flex items-center justify-center relative">
+                    <button onClick={() => setActiveImageIdx(prev => (prev > 0 ? prev - 1 : allImages.length - 1))} className="absolute left-0 p-6 bg-white/5 text-white rounded-full hover:bg-white/10 transition-all -translate-x-1/2 md:translate-x-0">
+                        <ChevronLeft size={32} />
+                    </button>
+                    
+                    <motion.img 
+                        key={activeImageIdx}
+                        initial={{ opacity: 0, scale: 0.9, x: 20 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        src={`http://localhost:5000${allImages[activeImageIdx]}`} 
+                        className="max-h-[70vh] rounded-[3rem] shadow-2xl object-contain"
+                    />
+
+                    <button onClick={() => setActiveImageIdx(prev => (prev < allImages.length - 1 ? prev + 1 : 0))} className="absolute right-0 p-6 bg-white/5 text-white rounded-full hover:bg-white/10 transition-all translate-x-1/2 md:translate-x-0">
+                        <ChevronRight size={32} />
+                    </button>
+                 </div>
+
+                 <div className="mt-10 flex gap-4 overflow-x-auto custom-scrollbar pb-6 px-10">
+                    {allImages.map((img, i) => (
+                        <button key={i} onClick={() => setActiveImageIdx(i)} className={`w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all shrink-0 ${activeImageIdx === i ? 'border-indigo-500 scale-110' : 'border-white/5'}`}>
+                            <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover" alt="Thumb" />
+                        </button>
+                    ))}
+                 </div>
+            </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex justify-between items-center mb-10">
           <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-black text-[10px] uppercase tracking-widest leading-none">
               <ChevronLeft size={16} /> Return to Portfolio
           </button>
-          <div className="flex items-center gap-4">
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">
+          <div className="flex items-center gap-4 text-slate-400 text-[10px] uppercase tracking-widest font-black">
+              <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full leading-none">
                   <Eye size={12} /> {property.views || 0} Market Views
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full leading-none">
+                  <ImageIcon size={12} /> {allImages.length} Visuals
               </span>
           </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-12">
-        
-        {/* Gallery & Description Column */}
         <div className="grow space-y-12">
             
-            {/* Hero Gallery */}
-            <div className="grid grid-cols-4 gap-4 h-[500px]">
-                <div className="col-span-4 md:col-span-3 rounded-[3rem] overflow-hidden relative group shadow-2xl">
-                    <img src={property.images?.[0] ? `http://localhost:5000${property.images[0]}` : ''} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={property.name} />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent p-12">
+            {/* Interactive Hero Gallery Grid */}
+            <div className="grid grid-cols-4 gap-4 h-[600px]">
+                <div 
+                    onClick={() => { setActiveImageIdx(0); setShowLightbox(true); }}
+                    className="col-span-4 md:col-span-3 rounded-[3rem] overflow-hidden relative group shadow-2xl cursor-pointer"
+                >
+                    <img src={`http://localhost:5000${allImages[0]}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={property.name} />
+                    <div className="absolute inset-0 bg-slate-900/10 group-hover:bg-transparent transition-all"></div>
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent p-12">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white rounded-full text-[9px] font-black tracking-widest uppercase mb-4 shadow-xl">
                             Verified Offering
                         </div>
@@ -110,16 +159,28 @@ const PropertyDetail = () => {
                         <p className="text-white/70 font-bold text-sm mt-2 flex items-center gap-2"><MapPin size={16} className="text-sky-400" /> {property.address}</p>
                     </div>
                 </div>
+
                 <div className="hidden md:flex flex-col gap-4">
-                    {property.images?.slice(1, 3).map((img, i) => (
-                        <div key={i} className="flex-1 rounded-[2.5rem] overflow-hidden border-4 border-white shadow-xl group cursor-pointer">
+                    {allImages.slice(1, 4).map((img, i) => (
+                        <div 
+                            key={i} 
+                            onClick={() => { setActiveImageIdx(i+1); setShowLightbox(true); }}
+                            className="flex-1 rounded-[2.5rem] overflow-hidden shadow-xl group cursor-pointer border border-white relative"
+                        >
                             <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Spec View" />
+                            {i === 2 && allImages.length > 4 && (
+                                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center text-white flex-col gap-1 transition-all group-hover:bg-slate-900/80">
+                                   <span className="text-2xl font-serif italic font-black">+{allImages.length - 4}</span>
+                                   <span className="text-[9px] font-black uppercase tracking-widest">Expansion</span>
+                                </div>
+                            )}
                         </div>
                     ))}
-                    {property.images?.length > 3 && (
-                        <div className="flex-1 rounded-[2.5rem] bg-slate-900 flex items-center justify-center text-white border-4 border-white shadow-xl cursor-pointer hover:bg-black transition-all">
-                            <span className="text-[10px] font-black tracking-widest">+{property.images.length - 3} MORE</span>
-                        </div>
+                    {allImages.length === 1 && (
+                         <div className="flex-1 rounded-[2.5rem] bg-slate-50 border-2 border-dashed border-slate-200 flex flex-col items-center justify-center text-slate-300 gap-2">
+                            <ImageIcon size={32} />
+                            <span className="text-[8px] font-black uppercase tracking-widest text-center px-4">Single Perspective Available</span>
+                         </div>
                     )}
                 </div>
             </div>
@@ -155,7 +216,6 @@ const PropertyDetail = () => {
                     Step into a masterpiece of modern architecture. This {property.bhk} BHK {property.type} situated at {property.address} is the epitome of refined living. Boasting a strategic location on the {property.floor} floor, this space has been designed with premium high-end aesthetics and maximum utility in mind. Perfect for those seeking a high-trust, verified real estate experience.
                 </p>
                 
-                {/* Location Map Shortcut */}
                 {property.locationLink && (
                     <div className="mt-12 p-8 bg-indigo-50 border border-indigo-100 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6">
                         <div>
@@ -173,7 +233,6 @@ const PropertyDetail = () => {
                     </div>
                 )}
 
-                {/* Owner Information */}
                 <div className="mt-16 pt-16 border-t border-slate-100 flex items-center justify-between gap-6">
                     <div className="flex items-center gap-6">
                         <div className="w-16 h-16 bg-slate-900 rounded-[1.5rem] flex items-center justify-center text-white font-black text-2xl shadow-xl">
@@ -186,10 +245,6 @@ const PropertyDetail = () => {
                             </p>
                         </div>
                     </div>
-                    <div className="hidden md:flex items-center gap-3 px-6 py-2 bg-emerald-50 border border-emerald-100 rounded-full">
-                        <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></span>
-                        <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">Ownership Verified</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -197,7 +252,6 @@ const PropertyDetail = () => {
         {/* Action Sidebar */}
         <div className="w-full lg:w-96 shrink-0">
             <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-2xl p-10 lg:sticky lg:top-24">
-                
                 <div className="flex justify-between items-center mb-10">
                    <div>
                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 leading-none">Market Status</p>
@@ -247,7 +301,6 @@ const PropertyDetail = () => {
                     </div>
                 </div>
 
-                {/* Security Badge */}
                 <div className="mt-12 p-8 bg-indigo-600 rounded-[2.5rem] text-white overflow-hidden relative shadow-2xl">
                     <div className="relative z-10">
                         <h4 className="font-serif italic text-xl font-black italic mb-2">100% Secured</h4>
