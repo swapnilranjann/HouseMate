@@ -42,4 +42,8 @@ export const getChats = () => api.get('/chats');
 export const getChatDetails = (id) => api.get(`/chats/${id}`);
 export const sendChatMessage = (id, text) => api.post(`/chats/${id}/messages`, { text });
 
+// --- Support APIs ---
+export const createSupportTicket = (data) => api.post('/support', data);
+export const getMyTickets = () => api.get('/support/my-tickets');
+
 export default api;

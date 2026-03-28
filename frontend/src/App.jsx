@@ -10,6 +10,7 @@ import PropertyDetail from './pages/PropertyDetail';
 import TenantDashboard from './pages/TenantDashboard';
 import CustomerDashboard from './pages/CustomerDashboard';
 import ChatPage from './pages/ChatPage';
+import SupportPage from './pages/SupportPage';
 import { useAuth } from './context/AuthContext.jsx';
 
 function App() {
@@ -50,6 +51,9 @@ function App() {
         } />
         <Route path="/chats/:id" element={
           user ? <ChatPage /> : <Navigate to="/" />
+        } />
+        <Route path="/support" element={
+          user ? <SupportPage /> : <Navigate to="/customer/login" />
         } />
 
         <Route path="*" element={<Navigate to="/" />} />

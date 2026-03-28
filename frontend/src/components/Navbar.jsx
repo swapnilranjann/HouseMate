@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Home, LogOut, LayoutDashboard, Heart, MessageSquare, ShieldCheck, UserCircle, Menu, UserPlus, Building, Key } from 'lucide-react';
+import { Home, LogOut, LayoutDashboard, Heart, MessageSquare, ShieldCheck, UserCircle, Menu, UserPlus, Building, Key, LifeBuoy } from 'lucide-react';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -40,6 +40,11 @@ const Navbar = () => {
                 <Link to="/chats" className="text-sm font-semibold text-slate-600 hover:text-indigo-600 flex items-center gap-2 transition-colors">
                   <MessageSquare size={18} />
                   <span>Messages</span>
+                </Link>
+
+                <Link to="/support" className="text-sm font-semibold text-slate-600 hover:text-indigo-600 flex items-center gap-2 transition-colors">
+                  <LifeBuoy size={18} />
+                  <span>Support</span>
                 </Link>
 
                 <div className="h-8 w-px bg-gray-200 mx-2"></div>
