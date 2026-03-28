@@ -144,7 +144,7 @@ const TenantDashboard = () => {
                          <div className="space-y-10">
                             <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em] border-b border-slate-100 pb-4">01. Home Type</h4>
                             <div className="space-y-6">
-                                <input type="text" placeholder="House Name (e.g. Skyline Villa)" required className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-8 focus:ring-sky-500/5 focus:border-sky-500 text-xs font-black tracking-widest transition-all outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                                <input type="text" placeholder="ENTER HOUSE NAME (E.G. SKYLINE VILLA)..." required className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-8 focus:ring-sky-500/5 focus:border-sky-500 text-xs font-black tracking-widest transition-all outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                                 <div className="grid grid-cols-2 gap-3">
                                     {['Flat', 'House', 'Villa', 'Office', 'Shop'].map(t => (
                                         <button key={t} type="button" onClick={() => setFormData({...formData, type: t})} className={`py-4 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${formData.type === t ? 'bg-sky-600 border-sky-600 text-white shadow-xl' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300'}`}>
@@ -158,16 +158,16 @@ const TenantDashboard = () => {
                             <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em] border-b border-slate-100 pb-4">02. Location Details</h4>
                             <div className="space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
-                                    <input type="text" placeholder="Floor Level" required className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} />
-                                    <input type="text" placeholder="House No." required className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} />
+                                    <input type="text" placeholder="FLOOR LEVEL..." required className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} />
+                                    <input type="text" placeholder="HOUSE NO..." required className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.number} onChange={e => setFormData({...formData, number: e.target.value})} />
                                 </div>
                                 <div className="relative">
                                     <MapPin className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-300" size={20} />
-                                    <input type="text" placeholder="Full Area Address" required className="w-full pl-16 pr-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                                    <input type="text" placeholder="ENTER FULL AREA ADDRESS..." required className="w-full pl-16 pr-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
                                 </div>
                                 <div className="relative">
                                     <Globe className="absolute left-6 top-1/2 -translate-y-1/2 text-sky-400" size={20} />
-                                    <input type="url" placeholder="Paste Google Maps Link" required className="w-full pl-16 pr-8 py-5 bg-sky-50 border border-sky-100 rounded-2xl focus:ring-8 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.locationLink} onChange={e => setFormData({...formData, locationLink: e.target.value})} />
+                                    <input type="url" placeholder="PASTE GOOGLE MAPS LINK..." required className="w-full pl-16 pr-8 py-5 bg-sky-50 border border-sky-100 rounded-2xl focus:ring-8 focus:ring-sky-500/10 text-xs font-black tracking-widest transition-all outline-none" value={formData.locationLink} onChange={e => setFormData({...formData, locationLink: e.target.value})} />
                                 </div>
                             </div>
                          </div>
