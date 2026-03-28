@@ -95,16 +95,16 @@ const Home = () => {
 
       {/* Results Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        <div className="flex items-center justify-between mb-8 group cursor-default">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 group cursor-default">
             <div>
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                    Available <span className="text-indigo-600">{activeType === 'All' ? 'Listings' : `${activeType}s`}</span>
+                <h2 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3 leading-none">
+                    Available <span className="text-indigo-600 underline decoration-indigo-500/20 underline-offset-[12px]">{activeType === 'All' ? 'Properties' : `${activeType}s`}</span>
                 </h2>
-                <div className="h-1 w-12 bg-indigo-500 mt-1 rounded-full group-hover:w-24 transition-all duration-500"></div>
+                <div className="h-1.5 w-16 bg-indigo-500 mt-4 rounded-full group-hover:w-32 transition-all duration-700"></div>
             </div>
-            <div className="flex items-center gap-2 bg-indigo-50 text-indigo-700 px-4 py-1.5 rounded-full border border-indigo-100 shadow-sm">
-                <Activity size={14} className="animate-pulse" />
-                <span className="text-xs font-black uppercase tracking-widest">{filteredProperties.length} Matches</span>
+            <div className="flex items-center gap-3 bg-white text-slate-900 px-6 py-3 rounded-2xl border border-slate-200 shadow-sm self-start">
+                <Activity size={18} className="text-indigo-500 animate-pulse" />
+                <span className="text-sm font-black uppercase tracking-widest leading-none">{filteredProperties.length} Total Matches</span>
             </div>
         </div>
 
