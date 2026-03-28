@@ -31,25 +31,30 @@ const PropertyDetail = () => {
     }
   };
 
-  const checkExistingStatus = async () => {
+  const checkExistingStatus = async (forceInquiryResult = null) => {
     try {
         const [aRes, cRes] = await Promise.all([getMyAppointments(), getChats()]);
         const appt = aRes.data.find(a => a.propertyId?._id === id);
-        if (appt) setRequestStatus(appt.status);
         
-        const chat = cRes.data.find(c => c.appointmentId?._id === appt?._id);
+        if (appt) setRequestStatus(appt.status);
+        else if (forceInquiryResult) setRequestStatus('pending');
+
+        // Look for chat linked to this property's appointment
+        const chat = cRes.data.find(c => c.appointmentId?._id === appt?._id || c.appointmentId === (appt?._id || forceInquiryResult?._id));
         if (chat) setExistingChatId(chat._id);
     } catch (err) {
-        console.error("Status Check Error:", err);
+        console.error("Discovery Error:", err);
     }
   };
 
   const handleRequestAppointment = async () => {
     if (!user) return navigate('/customer/login');
     try {
-      await requestAppointment(id);
+      const res = await requestAppointment(id);
       setRequestStatus('pending');
-      toast.success('Inquiry transmitted! The lister will correspond soon.');
+      toast.success('Inquiry transmitted! Instant channel established.');
+      // Re-sync status to get the CID immediately
+      setTimeout(() => checkExistingStatus(res.data), 500);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Transaction error');
     }
@@ -61,6 +66,10 @@ const PropertyDetail = () => {
         navigate(`/chats/${existingChatId}`);
      } else if (requestStatus === 'rejected') {
         toast.error('This inquiry was denied. Communication is blocked.');
+     } else if (requestStatus === 'pending') {
+        // If we have an inquiry but no chat ID synced yet, try to find it
+        checkExistingStatus();
+        toast('Establishing secure frequency... try again in a moment.', { icon: '📡' });
      } else {
         toast.error('Submit an inspection request first to open a direct channel.');
      }
@@ -79,7 +88,7 @@ const PropertyDetail = () => {
           </button>
           <div className="flex items-center gap-4">
               <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full text-[9px] font-black uppercase tracking-widest text-slate-400 leading-none">
-                  <Eye size={12} /> {property.views || 3} Market Views
+                  <Eye size={12} /> {property.views || 0} Market Views
               </span>
           </div>
       </div>
@@ -224,13 +233,13 @@ const PropertyDetail = () => {
                     <div className="flex items-center gap-4">
                         <button 
                             onClick={handleMessageTap}
-                            className={`p-4 rounded-xl shadow-sm transition-all border flex-1 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest ${
-                                existingChatId && requestStatus === 'approved' 
+                            className={`p-4 rounded-xl shadow-sm transition-all border flex-1 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest min-h-[56px] ${
+                                existingChatId && requestStatus !== 'rejected' 
                                 ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-black' 
-                                : 'bg-white text-slate-400 border-slate-200 hover:text-slate-900 group'
+                                : 'bg-white text-slate-400 border-slate-200 hover:text-slate-900'
                             }`}
                         >
-                            <MessageSquare size={18} /> {existingChatId && requestStatus === 'approved' ? 'OPEN SECURE CHAT' : 'CHANNELS'}
+                            <MessageSquare size={18} /> {existingChatId && requestStatus !== 'rejected' ? 'OPEN CHAT' : 'CHANNELS'}
                         </button>
                         <button className="p-4 bg-white border border-slate-200 text-slate-400 rounded-xl hover:text-slate-900 transition-all shadow-sm">
                              <Share2 size={18} />
@@ -242,10 +251,7 @@ const PropertyDetail = () => {
                 <div className="mt-12 p-8 bg-indigo-600 rounded-[2.5rem] text-white overflow-hidden relative shadow-2xl">
                     <div className="relative z-10">
                         <h4 className="font-serif italic text-xl font-black italic mb-2">100% Secured</h4>
-                        <p className="text-indigo-100 text-[11px] font-medium leading-relaxed">This property was verified by HouseMate Intelligence. Booking requests are encrypted and shared only with the verified owner.</p>
-                    </div>
-                    <div className="absolute -bottom-6 -right-6 opacity-20 rotate-12">
-                        <ShieldCheck size={120} />
+                        <p className="text-indigo-100 text-[11px] font-medium leading-relaxed">Verified by HouseMate Intelligence. Inquiries are shared only with the verified owner.</p>
                     </div>
                 </div>
             </div>

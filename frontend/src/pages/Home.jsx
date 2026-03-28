@@ -3,6 +3,7 @@ import { getProperties } from '../services/api';
 import PropertyCard from '../components/PropertyCard';
 import { Search, MapPin, Home as HomeIcon, LayoutGrid, Building, Briefcase, ShoppingBag, Activity, ChevronRight, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import EmptyState from '../components/EmptyState';
 
 const Home = () => {
   const [properties, setProperties] = useState([]);
@@ -142,14 +143,14 @@ const Home = () => {
         )}
 
         {filteredProperties.length === 0 && !loading && (
-            <div className="py-32 text-center bg-white rounded-[3rem] border border-slate-100 shadow-inner flex flex-col items-center gap-6">
-                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center text-slate-200">
-                    <Search size={40} />
-                </div>
-                <h3 className="text-2xl font-serif italic font-black text-slate-900 tracking-tight uppercase">Search yielded zero results</h3>
-                <p className="text-slate-400 font-medium max-w-xs mx-auto">Try adjusting your filters or search keywords to explore more premiums.</p>
-                <button onClick={() => { setActiveType('All'); setSearchQuery(''); }} className="text-indigo-600 font-black text-[10px] uppercase tracking-widest underline underline-offset-8">RESET FILTERS</button>
-            </div>
+             <EmptyState 
+                title="Search yielded zero results"
+                message="Try adjusting your filters or search keywords to explore more premiums. Every asset is unique."
+                icon={Search}
+                actionText="RESET ALL FILTERS"
+                onAction={() => { setActiveType('All'); setSearchQuery(''); }}
+                color="indigo"
+             />
         )}
       </div>
     </div>

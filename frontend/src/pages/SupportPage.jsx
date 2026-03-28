@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { createSupportTicket, getMyTickets } from '../services/api';
-import { LifeBuoy, Send, Clock, AlertCircle, CheckCircle, ChevronRight } from 'lucide-react';
+import { LifeBuoy, Send, Clock, AlertCircle, CheckCircle, ChevronRight, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import DataTable from '../components/ui/DataTable';
+import DashboardHeader from '../components/DashboardHeader';
 
 const SupportPage = () => {
   const [tickets, setTickets] = useState([]);
@@ -41,10 +42,10 @@ const SupportPage = () => {
 
   const getStatusStyle = (status) => {
     switch (status) {
-      case 'Open': return 'bg-blue-100 text-blue-700 border-blue-200';
-      case 'In Progress': return 'bg-amber-100 text-amber-700 border-amber-200';
-      case 'Resolved': return 'bg-green-100 text-green-700 border-green-200';
-      default: return 'bg-gray-100 text-gray-700 border-gray-200';
+      case 'Open': return 'bg-blue-50 text-blue-600 border-blue-100';
+      case 'In Progress': return 'bg-amber-50 text-amber-600 border-amber-100';
+      case 'Resolved': return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+      default: return 'bg-slate-50 text-slate-600 border-slate-100';
     }
   };
 
@@ -53,22 +54,8 @@ const SupportPage = () => {
       header: 'Created',
       accessor: 'createdAt',
       render: (row) => (
-        <span className="text-xs font-bold text-slate-400 flex items-center gap-1">
-          <Clock size={14} /> {new Date(row.createdAt).toLocaleDateString()}
-        </span>
-      )
-    },
-    {
-      header: 'Subject',
-      accessor: 'subject',
-      cellClassName: 'font-bold text-slate-900'
-    },
-    {
-      header: 'Status',
-      accessor: 'status',
-      render: (row) => (
-        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-widest border ${getStatusStyle(row.status)}`}>
-          {row.status}
+        <span className="text-[10px] font-black text-slate-400 flex items-center gap-1.5 uppercase tracking-widest leading-none">
+          <Clock size={12} className="text-indigo-400" /> {new Date(row.createdAt).toLocaleDateString()}
         </span>
       )
     },
@@ -76,104 +63,120 @@ const SupportPage = () => {
       header: 'Priority',
       accessor: 'priority',
       render: (row) => (
-        <span className={`text-[10px] font-black uppercase tracking-widest ${row.priority === 'High' ? 'text-red-500' : 'text-slate-400'}`}>
+        <span className={`text-[10px] font-black uppercase tracking-widest leading-none ${row.priority === 'High' ? 'text-rose-500' : 'text-slate-400'}`}>
           {row.priority}
+        </span>
+      )
+    },
+    {
+      header: 'Subject',
+      accessor: 'subject',
+      cellClassName: 'font-serif italic font-black text-slate-900 uppercase italic text-sm'
+    },
+    {
+      header: 'Status',
+      accessor: 'status',
+      render: (row) => (
+        <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border leading-none ${getStatusStyle(row.status)}`}>
+          {row.status}
         </span>
       )
     }
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className="mb-12 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight flex items-center gap-3">
-             <LifeBuoy className="text-indigo-600 w-10 h-10" /> Support Center
-          </h1>
-          <p className="text-lg text-gray-500 mt-2 font-medium">Have an issue? We're here to help.</p>
-        </div>
-        <button 
-          onClick={() => setShowForm(!showForm)}
-          className="bg-indigo-600 hover:bg-black text-white px-8 py-4 rounded-2xl font-bold transition-all shadow-lg flex items-center gap-2 self-start"
-        >
-          {showForm ? 'View History' : 'New Support Ticket'}
-        </button>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      
+      <DashboardHeader 
+        title={<>Support <span className="text-indigo-600">Protocol</span></>}
+        subtitle="Our high-tier assistance desk is active. Every inquiry is verified and tracked by our intelligence layer."
+        icon={LifeBuoy}
+        roleLabel="Platform Concierge"
+        accentColor="indigo"
+        stats={[
+          { label: "Active Tickets", value: tickets.filter(t => t.status !== 'Resolved').length },
+          { label: "Resolution Status", value: `${Math.round((tickets.filter(t => t.status === 'Resolved').length / (tickets.length || 1)) * 100)}%` }
+        ]}
+      />
+
+      <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12">
+          <h2 className="text-2xl font-serif italic text-slate-900 font-black italic uppercase">Support Interactions</h2>
+          <button 
+            onClick={() => setShowForm(!showForm)}
+            className={`flex items-center gap-3 px-8 py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-2xl transition-all ${showForm ? 'bg-slate-50 text-slate-400 border border-slate-200' : 'bg-indigo-600 text-white hover:bg-black hover:-translate-y-1'}`}
+          >
+            {showForm ? 'VIEW INTERACTION HISTORY' : 'OPEN NEW PROTOCOL'}
+          </button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         {/* Form Section */}
-        <div className={`lg:col-span-1 ${showForm ? 'block' : 'hidden lg:block'}`}>
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden sticky top-24">
-            <div className="p-6 border-b border-gray-100 bg-gray-50/50 text-slate-900">
-               <h2 className="text-lg font-bold flex items-center gap-2">
-                 <Send size={18} className="text-indigo-600" /> Open a New Ticket
-               </h2>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-5">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Issue Category</label>
-                <select 
-                  className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all font-bold text-slate-700"
-                  value={formData.subject}
-                  onChange={e => setFormData({...formData, subject: e.target.value})}
-                >
-                  <option>Bug Report</option>
-                  <option>Scam Property</option>
-                  <option>Account Access</option>
-                  <option>Billing Issue</option>
-                  <option>General Question</option>
-                  <option>Other</option>
-                </select>
-              </div>
+        <AnimatePresence>
+            {showForm && (
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="lg:col-span-1">
+                <div className="bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden sticky top-24">
+                    <div className="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
+                       <h3 className="text-xl font-serif italic font-black text-slate-900 uppercase italic">New Inquiry</h3>
+                       <Send className="text-indigo-600" size={20} />
+                    </div>
+                    <form onSubmit={handleSubmit} className="p-8 space-y-8">
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Protocol Category</label>
+                        <select 
+                        className="w-full px-6 py-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 bg-slate-50 transition-all font-black text-[10px] uppercase tracking-widest appearance-none outline-none"
+                        value={formData.subject}
+                        onChange={e => setFormData({...formData, subject: e.target.value})}
+                        >
+                        <option>General Question</option>
+                        <option>Bug Report</option>
+                        <option>Scam Property</option>
+                        <option>Account Access</option>
+                        <option>Billing Issue</option>
+                        <option>Other</option>
+                        </select>
+                    </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2">Description</label>
-                <textarea 
-                  required
-                  rows="4"
-                  className="w-full px-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50 transition-all font-medium"
-                  placeholder="Details of your request..."
-                  value={formData.description}
-                  onChange={e => setFormData({...formData, description: e.target.value})}
-                ></textarea>
-              </div>
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Incident Description</label>
+                        <textarea 
+                        required
+                        rows="4"
+                        className="w-full px-6 py-4 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-600 bg-slate-50 transition-all text-xs font-bold leading-relaxed outline-none"
+                        placeholder="Provide deep details of your request..."
+                        value={formData.description}
+                        onChange={e => setFormData({...formData, description: e.target.value})}
+                        ></textarea>
+                    </div>
 
-              <div>
-                <label className="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider text-[10px]">Set Priority</label>
-                <div className="flex gap-4">
-                  {['Low', 'Normal', 'High'].map(p => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setFormData({...formData, priority: p})}
-                      className={`flex-1 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest border transition-all ${formData.priority === p ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300'}`}
-                    >
-                      {p}
-                    </button>
-                  ))}
+                    <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">Urgency Rating</label>
+                        <div className="flex gap-3">
+                        {['Low', 'Normal', 'High'].map(p => (
+                            <button
+                            key={p}
+                            type="button"
+                            onClick={() => setFormData({...formData, priority: p})}
+                            className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${formData.priority === p ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl scale-105' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'}`}
+                            >
+                            {p}
+                            </button>
+                        ))}
+                        </div>
+                    </div>
+
+                    <button type="submit" className="w-full py-5 bg-slate-900 border border-slate-900 hover:bg-black text-white rounded-2xl font-black tracking-[0.3em] text-[11px] shadow-2xl transition-all hover:-translate-y-1">TRANSMIT INQUIRY</button>
+                    </form>
                 </div>
-              </div>
-
-              <button type="submit" className="w-full py-4 bg-indigo-600 hover:bg-black text-white rounded-2xl font-bold shadow-lg transition-all">
-                Submit Request
-              </button>
-            </form>
-          </div>
-        </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
 
         {/* Ticket List */}
-        <div className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Support Interactions</h2>
-                <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
-                {tickets.length} Total
-                </span>
-            </div>
-            
+        <div className={showForm ? 'lg:col-span-2' : 'lg:col-span-3 max-w-5xl mx-auto w-full'}>
             <DataTable 
                 columns={columns} 
                 data={tickets} 
-                emptyMessage="You haven't submitted any support tickets yet."
+                emptyMessage="No active support protocols found in history."
             />
         </div>
       </div>
