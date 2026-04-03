@@ -7,9 +7,11 @@
 
 :root {
   --primary: #C2410C; 
+  --primary-rgb: 194, 65, 12;
   --primary-hover: #9A3412;
   --header-dark: #3E2723;
   --bg-light: #F9FAFB;
+  --gray-50: #F9FAFB;
   --gray-100: #F3F4F6;
   --gray-200: #E5E7EB;
   --gray-300: #D1D5DB;
@@ -37,7 +39,7 @@ h1, h2, h3, h4, font-bold {
 
 /* Custom Components using standard CSS for better compatibility */
 .btn-primary {
-  background-color: var(--primary);
+  background-color: var(--primary) !important;
   color: white !important;
   padding: 0.5rem 1rem;
   border-radius: 0.25rem;
@@ -52,12 +54,7 @@ h1, h2, h3, h4, font-bold {
 }
 
 .btn-primary:hover {
-  background-color: var(--primary-hover);
-}
-
-.btn-primary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+  background-color: var(--primary-hover) !important;
 }
 
 .card-enterprise {
@@ -67,13 +64,12 @@ h1, h2, h3, h4, font-bold {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-.table-row-classic {
-  border-bottom: 1px solid var(--gray-100);
-  transition: background-color 0.2s;
-}
-
-.table-row-classic:hover {
-  background-color: rgba(249, 250, 251, 1);
+.sidebar-active {
+  background-color: white !important;
+  color: var(--primary) !important;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar-icon {
@@ -82,6 +78,9 @@ h1, h2, h3, h4, font-bold {
   border-radius: 0.25rem;
   transition: all 0.2s;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .sidebar-icon:hover {
@@ -89,21 +88,9 @@ h1, h2, h3, h4, font-bold {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.sidebar-active {
-  background-color: white;
-  color: var(--primary);
-  padding: 0.5rem;
-  border-radius: 0.25rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
-}
-
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
@@ -111,15 +98,10 @@ h1, h2, h3, h4, font-bold {
   border-radius: 9999px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: var(--gray-400);
-}
-
-/* Global Reset for UI Consistency */
-input, select, textarea {
+/* Global Reset */
+button {
   border-radius: 0.25rem !important;
 }
-
-button {
+input, select, textarea {
   border-radius: 0.25rem !important;
 }

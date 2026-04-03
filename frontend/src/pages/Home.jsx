@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getProperties } from '../services/api';
 import PropertyCard from '../components/PropertyCard';
-import { Search, Filter, LayoutGrid, Eye } from 'lucide-react';
+import { Search, Filter, LayoutGrid, Eye, Calendar, Globe } from 'lucide-react';
 import EmptyState from '../components/EmptyState';
 import { useAuth } from '../context/AuthContext';
 
@@ -56,7 +56,12 @@ const Home = () => {
                        onChange={e => setSearchQuery(e.target.value)}
                     />
                 </div>
-                <button className="bg-[#C2410C] hover:bg-[#9A3412] text-white px-12 py-4 font-bold text-lg transition-all uppercase tracking-widest">Search</button>
+                <button 
+                    style={{ backgroundColor: 'var(--primary)' }}
+                    className="hover:brightness-110 text-white px-12 py-4 font-black text-lg transition-all uppercase tracking-[0.2em] shadow-lg"
+                >
+                    Initialize Search
+                </button>
               </div>
           </div>
         </section>
@@ -64,45 +69,49 @@ const Home = () => {
 
       <main className={`${user ? 'p-0' : 'max-w-7xl mx-auto px-4 py-16'}`}>
         {/* Enterprise Search Header (matches screenshot) */}
-        <div className="bg-white border border-gray-200 rounded-sm p-4 mb-8 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-            <div className="flex flex-1 items-center gap-4 w-full">
-                <div className="flex-1 relative flex items-center">
+        <div className="bg-white border border-gray-200 rounded-sm p-5 mb-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-sm">
+            <div className="flex flex-col md:flex-row flex-1 items-center gap-4 w-full">
+                <div className="flex-1 relative flex items-center w-full">
                     <input 
                         type="text" 
-                        placeholder="Property Name or Location Search" 
-                        className="w-full bg-[#FCFDFF] border border-gray-300 rounded px-10 py-2.5 text-xs font-bold uppercase tracking-widest outline-none focus:border-[#C2410C] transition-all"
+                        placeholder="ASSET NAME OR LOCATION IDENTIFIER" 
+                        className="w-full bg-[#FCFDFF] border border-gray-200 rounded-sm px-10 py-3 text-[10px] font-black uppercase tracking-[0.15em] outline-none focus:border-primary transition-all"
+                        style={{ borderLeftWidth: '4px', borderLeftColor: 'var(--primary)' }}
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                     />
-                    <Search className="absolute left-3 text-gray-400" size={14} />
-                    <button className="absolute right-3 text-gray-400 hover:text-gray-600"><Filter size={14}/></button>
+                    <Search className="absolute left-3 text-gray-300" size={14} />
+                    <button className="absolute right-3 text-gray-300 hover:text-gray-500"><Filter size={14}/></button>
                 </div>
-                <div className="flex-1 relative flex items-center">
+                <div className="flex-1 relative flex items-center w-full">
                     <input 
                         type="text" 
-                        placeholder="Search By Created Date" 
-                        className="w-full bg-[#FCFDFF] border border-gray-300 rounded px-10 py-2.5 text-xs font-bold uppercase tracking-widest outline-none focus:border-[#C2410C] transition-all"
+                        placeholder="TEMPORAL RANGE / CREATED DATE" 
+                        className="w-full bg-[#FCFDFF] border border-gray-200 rounded-sm px-10 py-3 text-[10px] font-black uppercase tracking-[0.15em] outline-none focus:border-primary transition-all"
                     />
-                    <Search className="absolute left-3 text-gray-400" size={14} />
-                    <button className="absolute right-3 text-gray-400 hover:text-gray-600"><Filter size={14}/></button>
+                    <Calendar className="absolute left-3 text-gray-300" size={14} />
+                    <button className="absolute right-3 text-gray-300 hover:text-gray-500"><Filter size={14}/></button>
                 </div>
             </div>
-            <div className="flex items-center gap-1">
-                <button className="p-2.5 text-gray-400 hover:text-gray-600"><LayoutGrid size={20}/></button>
-                <button className="p-2.5 text-gray-400 hover:text-gray-600"><Eye size={20}/></button>
+            <div className="flex items-center gap-2">
+                <button className="p-3 bg-gray-50 text-gray-400 rounded-sm hover:text-gray-600 border border-gray-100"><LayoutGrid size={18}/></button>
+                <button className="p-3 bg-gray-50 text-gray-400 rounded-sm hover:text-gray-600 border border-gray-100"><Eye size={18}/></button>
             </div>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-1 mb-8 overflow-x-auto pb-2 custom-scrollbar">
+        <div className="flex items-center gap-2 mb-10 overflow-x-auto pb-4 no-scrollbar">
             {types.map(type => (
                 <button 
                     key={type}
                     onClick={() => setActiveType(type)}
-                    className={`px-6 py-2 border rounded-sm text-xs font-bold uppercase tracking-widest transition-all ${
-                        activeType === type 
-                        ? 'bg-[#C2410C] border-[#C2410C] text-white' 
-                        : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+                    style={{ 
+                        backgroundColor: activeType === type ? 'var(--primary)' : 'white',
+                        borderColor: activeType === type ? 'var(--primary)' : '#eee',
+                        color: activeType === type ? 'white' : '#999'
+                    }}
+                    className={`px-8 py-2.5 border rounded-sm text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xs ${
+                        activeType === type ? 'shadow-md' : 'hover:border-gray-300'
                     }`}
                 >
                     {type}
@@ -111,43 +120,58 @@ const Home = () => {
         </div>
 
         {loading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {[1,2,3,4,5,6,7,8].map(i => <div key={i} className="h-80 bg-white animate-pulse rounded-sm border border-gray-200"></div>)}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                {[1,2,3,4,5,6,7,8].map(i => <div key={i} className="h-96 bg-white animate-pulse rounded-sm border border-gray-100 shadow-sm"></div>)}
             </div>
         ) : filteredProperties.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                 {filteredProperties.map(p => (
                     <PropertyCard key={p._id} property={p} />
                 ))}
             </div>
         ) : (
             <EmptyState 
-                title="No properties found"
-                message="Try adjusting your search criteria."
+                title="NO ASSETS IDENTIFIED"
+                message="Adjust search parameters to locate matching inventory."
                 icon={Search}
-                actionText="View All Properties"
+                actionText="RESET ALL FILTERS"
                 onAction={() => { setActiveType('All'); setSearchQuery(''); }}
-                color="orange"
+                color="var(--primary)"
             />
         )}
       </main>
 
       {!user && (
-        <footer className="bg-[#3E2721] text-white py-20 mt-20">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-10">
-              <div className="max-w-xs">
-                  <h2 className="text-3xl font-bold mb-4 uppercase">HouseMate</h2>
-                  <p className="text-white/60 font-medium">Standardizing the real estate rental bridge across the nation.</p>
+        <footer className="bg-[#111827] text-white py-24 mt-24 border-t-4" style={{ borderColor: 'var(--primary)' }}>
+          <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-start gap-12">
+              <div className="max-w-md">
+                  <h2 className="text-4xl font-black mb-6 uppercase tracking-tight">HouseMate</h2>
+                  <p className="text-gray-400 font-bold text-sm leading-relaxed uppercase tracking-widest opacity-60">Standardizing the real estate rental bridge across the nation with enterprise-grade infrastructure.</p>
               </div>
-              <div className="flex gap-20">
-                  <div className="space-y-4">
-                      <h4 className="text-xs font-black uppercase text-white/40 tracking-widest">Navigation</h4>
-                      <div className="flex flex-col gap-2 font-bold text-sm">
-                          <a href="#" className="hover:text-[#C2410C]">About</a>
-                          <a href="#" className="hover:text-[#C2410C]">Terms</a>
+              <div className="grid grid-cols-2 gap-24">
+                  <div className="space-y-6">
+                      <h4 className="text-[10px] font-black uppercase text-gray-500 tracking-[0.3em]">Operational</h4>
+                      <div className="flex flex-col gap-4 font-black text-[11px] uppercase tracking-widest text-gray-400">
+                          <a href="#" className="hover:text-white transition-colors">Asset Management</a>
+                          <a href="#" className="hover:text-white transition-colors">Market Analysis</a>
+                      </div>
+                  </div>
+                  <div className="space-y-6">
+                      <h4 className="text-[10px] font-black uppercase text-gray-500 tracking-[0.3em]">Institutional</h4>
+                      <div className="flex flex-col gap-4 font-black text-[11px] uppercase tracking-widest text-gray-400">
+                          <a href="#" className="hover:text-white transition-colors">Protocol</a>
+                          <a href="#" className="hover:text-white transition-colors">Governance</a>
                       </div>
                   </div>
               </div>
+          </div>
+          <div className="max-w-7xl mx-auto px-4 mt-20 pt-8 border-t border-white/5 flex justify-between items-center">
+             <p className="text-[9px] font-black text-gray-600 uppercase tracking-widest">© 2024 HOUSEMATE INFRASTRUCTURE. ALL RIGHTS RESERVED.</p>
+             <div className="flex gap-6">
+                 <div className="w-8 h-8 rounded-sm bg-white/5 border border-white/10 flex items-center justify-center">
+                    <Globe size={14} className="text-gray-500" />
+                 </div>
+             </div>
           </div>
         </footer>
       )}

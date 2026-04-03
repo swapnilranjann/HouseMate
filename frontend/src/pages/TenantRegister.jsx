@@ -17,7 +17,7 @@ const TenantRegister = () => {
     try {
       await registerUser(formData);
       const { data } = await loginUser({ email: formData.email, password: formData.password, role: 'tenant' });
-      login(data.user, data.token);
+      login(data.data.user, data.data.token);
       toast.success('Registration successful. Welcome to the Owner Portal!');
       navigate('/tenant/dashboard');
     } catch (err) {
@@ -56,8 +56,9 @@ const TenantRegister = () => {
                 <input 
                     type="text" 
                     required 
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
-                    placeholder="John Doe" 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                    style={{ '--tw-ring-color': 'transparent' }}
+                    placeholder="Company or Full Name" 
                     value={formData.name} 
                     onChange={e => setFormData({...formData, name: e.target.value})} 
                 />
@@ -66,28 +67,30 @@ const TenantRegister = () => {
 
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Email</label>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Corporate Email</label>
                   <div className="relative">
                     <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                     <input 
                         type="email" 
                         required 
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
-                        placeholder="email@example.com" 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                        style={{ '--tw-ring-color': 'transparent' }}
+                        placeholder="owner@company.com" 
                         value={formData.email} 
                         onChange={e => setFormData({...formData, email: e.target.value})} 
                     />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Phone</label>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Direct Line</label>
                   <div className="relative">
                     <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                     <input 
                         type="tel" 
                         required 
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
-                        placeholder="Phone Number" 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                        style={{ '--tw-ring-color': 'transparent' }}
+                        placeholder="Business Phone" 
                         value={formData.phone} 
                         onChange={e => setFormData({...formData, phone: e.target.value})} 
                     />
@@ -96,13 +99,14 @@ const TenantRegister = () => {
             </div>
 
             <div>
-              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Password</label>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Security Key</label>
               <div className="relative">
                 <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                 <input 
                     type="password" 
                     required 
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                    style={{ '--tw-ring-color': 'transparent' }}
                     placeholder="••••••••" 
                     value={formData.password} 
                     onChange={e => setFormData({...formData, password: e.target.value})} 
@@ -110,26 +114,26 @@ const TenantRegister = () => {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full h-11 uppercase text-[11px] tracking-widest mt-4">
-              {loading ? 'Registering...' : 'Complete Setup'}
+            <button type="submit" disabled={loading} style={{ backgroundColor: 'var(--primary)' }} className="text-white w-full h-11 uppercase text-[11px] tracking-widest font-bold rounded flex justify-center items-center hover:opacity-90 transition-opacity mt-4">
+              {loading ? 'Initializing Interface...' : 'Deploy Portfolio'}
             </button>
           </form>
 
           <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-4">
               <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest">
-                <span className="text-gray-400">Already registered?</span>
-                <Link to="/tenant/login" className="text-[#C2410C] hover:underline">Sign In</Link>
+                <span className="text-gray-400">Existing portfolio?</span>
+                <Link to="/tenant/login" style={{ color: 'var(--primary)' }} className="hover:underline">Access Portal</Link>
               </div>
 
               <Link to="/customer/register" className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded group hover:bg-gray-100 transition-colors">
                 <div className="flex items-center gap-3">
-                    <UserCircle size={16} className="text-gray-400" />
+                    <User size={16} className="text-gray-400" />
                     <div>
-                        <p className="text-[9px] font-bold text-gray-900 uppercase tracking-widest mb-0.5">Looking for a home?</p>
-                        <p className="text-[8px] font-bold text-[#C2410C] uppercase tracking-widest">Register as Customer</p>
+                        <p className="text-[9px] font-bold text-gray-900 uppercase tracking-widest mb-0.5">Looking for properties?</p>
+                        <p className="text-[8px] font-bold uppercase tracking-widest" style={{ color: 'var(--primary)' }}>Register as Customer</p>
                     </div>
                 </div>
-                <ChevronRight size={14} className="text-gray-300 group-hover:text-[#C2410C] transition-colors" />
+                <ChevronRight size={14} className="text-gray-300 transition-colors" />
               </Link>
           </div>
         </div>
