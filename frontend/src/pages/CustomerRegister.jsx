@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { registerUser } from '../services/api';
-import { Lock, Mail, User, Phone, ArrowRight, ShieldCheck, UserPlus } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { registerUser, loginUser } from '../services/api';
+import { User, Mail, Phone, Lock, ChevronRight, Building } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const CustomerRegister = () => {
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '', role: 'customer' });
   const [loading, setLoading] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -15,175 +16,122 @@ const CustomerRegister = () => {
     setLoading(true);
     try {
       await registerUser(formData);
-      toast.success('Account created! Sign in to start your journey.');
-      navigate('/customer/login');
+      const { data } = await loginUser({ email: formData.email, password: formData.password, role: 'customer' });
+      login(data.user, data.token);
+      toast.success('Registration successful. Welcome to HouseMate!');
+      navigate('/');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Registration failed');
+      toast.error(err.response?.data?.message || 'Registration failed.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] bg-white flex-row-reverse">
-      
-      {/* High-End Split Imagery */}
-      <div className="hidden lg:block lg:w-1/2 relative bg-slate-900 overflow-hidden">
-        <motion.img 
-          initial={{ scale: 1.1, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.7 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
-          src="https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=1200" 
-          alt="Luxury Architecture" 
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-[2000ms] hover:scale-110"
+    <div className="flex min-h-[calc(100vh-64px)] bg-white">
+      <div className="hidden lg:block lg:w-1/2 relative bg-gray-900 border-r border-gray-200 overflow-hidden">
+        <img 
+          src="https://images.unsplash.com/photo-1560448204-61dc36dc98ce?q=80&w=1200" 
+          alt="Modern Home" 
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent flex flex-col justify-end p-20">
-            <motion.div 
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 }}
-                className="max-w-md"
-            >
-                <div className="w-12 h-1 bg-indigo-500 mb-8 rounded-full"></div>
-                <h2 className="text-6xl font-serif font-black text-white mb-6 leading-tight uppercase italic-none tracking-tighter">Your New <br/> Chapter.</h2>
-                <p className="text-slate-400 text-xl font-medium leading-relaxed">Join thousands of verified users finding their perfect home through our curated lifestyle marketplace.</p>
-            </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent flex flex-col justify-end p-16">
+            <h2 className="text-4xl font-bold text-white mb-4 uppercase tracking-tight">Verified Listings</h2>
+            <p className="text-gray-400 text-lg font-medium max-w-sm">Join our platform to find and secure your next home with ease.</p>
         </div>
       </div>
 
-      {/* Boutique Form Container */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white relative">
-        <div className="w-full max-w-md">
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            className="mb-12"
-          >
-              <div className="w-16 h-16 bg-slate-900 text-white rounded-[1.5rem] flex items-center justify-center mb-8 shadow-[0_20px_40px_rgba(0,0,0,0.2)]">
-                  <UserPlus size={32} />
-              </div>
-              <h1 className="text-5xl font-serif font-black text-slate-900 mb-4 tracking-tighter uppercase italic-none">Join Now</h1>
-              <p className="text-slate-400 font-medium text-lg leading-relaxed">Sign up to safely browse verified properties and contact owners directly.</p>
-          </motion.div>
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#F8FAFC]">
+        <div className="w-full max-w-md bg-white p-10 rounded border border-gray-200 shadow-sm">
+          <div className="mb-8">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 uppercase tracking-widest">Customer Registration</h1>
+              <p className="text-gray-500 font-medium text-sm">Create an account to start your search.</p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="space-y-2"
-            >
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Full Name</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                  <User size={18} />
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Full Name</label>
+              <div className="relative">
+                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                 <input 
                     type="text" 
                     required 
-                    className="pl-14 w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-600 focus:bg-white transition-all font-black text-[11px] uppercase tracking-widest outline-none hover:shadow-md" 
-                    placeholder="ENTER YOUR FULL NAME..." 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                    placeholder="John Doe" 
                     value={formData.name} 
                     onChange={e => setFormData({...formData, name: e.target.value})} 
                 />
               </div>
-            </motion.div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="space-y-2"
-              >
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Email</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                    <Mail size={18} />
-                  </div>
-                  <input 
-                    type="email" 
-                    required 
-                    className="pl-14 w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-600 focus:bg-white transition-all font-black text-[11px] uppercase tracking-widest outline-none hover:shadow-md" 
-                    placeholder="EMAIL@EXAMPLE.COM" 
-                    value={formData.email} 
-                    onChange={e => setFormData({...formData, email: e.target.value})} 
-                  />
-                </div>
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="space-y-2"
-              >
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Phone</label>
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                    <Phone size={18} />
-                  </div>
-                  <input 
-                    type="tel" 
-                    required 
-                    className="pl-14 w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-600 focus:bg-white transition-all font-black text-[11px] uppercase tracking-widest outline-none hover:shadow-md" 
-                    placeholder="+1 234 567 890" 
-                    value={formData.phone} 
-                    onChange={e => setFormData({...formData, phone: e.target.value})} 
-                  />
-                </div>
-              </motion.div>
             </div>
 
-            <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="space-y-2"
-            >
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Create Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                  <Lock size={18} />
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Email</label>
+                  <div className="relative">
+                    <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
+                    <input 
+                        type="email" 
+                        required 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                        placeholder="email@example.com" 
+                        value={formData.email} 
+                        onChange={e => setFormData({...formData, email: e.target.value})} 
+                    />
+                  </div>
                 </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Phone</label>
+                  <div className="relative">
+                    <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
+                    <input 
+                        type="tel" 
+                        required 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                        placeholder="Phone Number" 
+                        value={formData.phone} 
+                        onChange={e => setFormData({...formData, phone: e.target.value})} 
+                    />
+                  </div>
+                </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Password</label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                 <input 
                     type="password" 
                     required 
-                    className="pl-14 w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-600 focus:bg-white transition-all font-black text-[11px] uppercase tracking-widest outline-none hover:shadow-md" 
-                    placeholder="MINIMUM 8 CHARACTERS..." 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                    placeholder="••••••••" 
                     value={formData.password} 
                     onChange={e => setFormData({...formData, password: e.target.value})} 
                 />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.button 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                type="submit" 
-                disabled={loading} 
-                className="w-full py-6 bg-slate-900 border border-slate-900 hover:bg-black text-white rounded-2xl md:rounded-3xl font-black tracking-[0.4em] text-[12px] shadow-2xl transition-all hover:-translate-y-1 flex items-center justify-center gap-4 active:scale-95 uppercase mt-6"
-            >
-              {loading ? 'Creating Record...' : 'Complete Registration'} <ArrowRight size={20} />
-            </motion.button>
+            <button type="submit" disabled={loading} className="btn-primary w-full h-11 uppercase text-[11px] tracking-widest mt-4">
+              {loading ? 'Creating Account...' : 'Register'}
+            </button>
           </form>
 
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            transition={{ delay: 0.7 }}
-            className="mt-12 pt-10 border-t border-slate-50 flex items-center justify-between text-[11px] font-black uppercase tracking-widest"
-          >
-            <span className="text-slate-400">Already a member?</span>
-            <Link to="/customer/login" className="text-indigo-600 hover:text-slate-900 border-b-2 border-indigo-600/10 hover:border-slate-900 transition-all pb-1">Sign In</Link>
-          </motion.div>
-        </div>
+          <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-4">
+              <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest">
+                <span className="text-gray-400">Already have an account?</span>
+                <Link to="/customer/login" className="text-[#C2410C] hover:underline">Sign In</Link>
+              </div>
 
-        {/* Floating Trust Indicator */}
-        <div className="absolute top-10 right-10 hidden xl:flex items-center gap-3 bg-slate-50/50 px-4 py-2 rounded-full border border-slate-100 backdrop-blur-sm">
-            <ShieldCheck size={14} className="text-indigo-600" />
-            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Verified Marketplace</span>
+              <Link to="/tenant/register" className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded group hover:bg-gray-100 transition-colors">
+                <div className="flex items-center gap-3">
+                    <Building size={16} className="text-gray-400" />
+                    <div>
+                        <p className="text-[9px] font-bold text-gray-900 uppercase tracking-widest mb-0.5">Are you an owner?</p>
+                        <p className="text-[8px] font-bold text-[#C2410C] uppercase tracking-widest">Register as Owner</p>
+                    </div>
+                </div>
+                <ChevronRight size={14} className="text-gray-300 group-hover:text-[#C2410C] transition-colors" />
+              </Link>
+          </div>
         </div>
       </div>
     </div>

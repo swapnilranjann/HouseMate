@@ -2,14 +2,18 @@ const express = require('express');
 const router = express.Router();
 const SupportTicket = require('../models/SupportTicket');
 const auth = require('../middleware/auth');
+const response = require('../utils/response');
 
-// Create a new support ticket
+/**
+ * @route   POST /api/support
+ * @desc    Initialize support ticket sequence
+ */
 router.post('/', auth, async (req, res) => {
   try {
     const { subject, description, priority } = req.body;
     
     if (!subject || !description) {
-      return res.status(400).json({ message: 'Subject and description are required.' });
+      return response.error(res, 'Identity verification: Subject and description required.', 400);
     }
 
     const ticket = new SupportTicket({
@@ -20,21 +24,23 @@ router.post('/', auth, async (req, res) => {
     });
 
     await ticket.save();
-    res.status(201).json(ticket);
-  } catch (error) {
-    console.error('Support ticket error:', error);
-    res.status(500).json({ message: 'Server error processing ticket' });
+    response.success(res, ticket, 'Support ticket initialized successfully.', 201);
+  } catch (err) {
+    console.error('Support ticket error:', err.stack);
+    response.error(res, 'Support node sequence failure.');
   }
 });
 
-// Get user's tickets
+/**
+ * @route   GET /api/support/my-tickets
+ * @desc    Retrieve all tickets for current identity
+ */
 router.get('/my-tickets', auth, async (req, res) => {
   try {
     const tickets = await SupportTicket.find({ user: req.user.id }).sort({ createdAt: -1 });
-    res.json(tickets);
-  } catch (error) {
-    console.error('Fetch tickets error:', error);
-    res.status(500).json({ message: 'Server error fetching tickets' });
+    response.success(res, tickets, 'Identity support tickets synchronised.');
+  } catch (err) {
+    response.error(res, 'Ticket retrieval handshake failure.');
   }
 });
 

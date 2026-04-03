@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPropertyById, requestAppointment, incrementPropertyView, getMyAppointments, getChats } from '../services/api';
-import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building, Lock, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { getPropertyById, requestAppointment, incrementPropertyView, getMyAppointments, getChats, favoriteProperty } from '../services/api';
+import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building, Lock, X, ChevronRight, Image as ImageIcon, Heart, Home } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -17,16 +17,22 @@ const PropertyDetail = () => {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
 
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+
   useEffect(() => {
     fetchProperty();
     incrementPropertyView(id);
-    if (user) checkExistingStatus();
+    if (user) {
+        checkExistingStatus();
+        setIsFavorited(user.favorites?.includes(id));
+    }
   }, [id, user]);
 
   const fetchProperty = async () => {
     try {
-      const data = await getPropertyById(id);
-      setProperty(data);
+      const { data } = await getPropertyById(id);
+      setProperty(data.data); 
     } catch (err) {
       console.error(err);
     } finally {
@@ -62,11 +68,10 @@ const PropertyDetail = () => {
     try {
       const res = await requestAppointment(id);
       setRequestStatus('pending');
-      toast.success('Inquiry transmitted! Linking secure channel...');
-      // Instant sync
+      toast.success('Inquiry submitted successfully.');
       await checkExistingStatus(res.data);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Transaction error');
+      toast.error(err.response?.data?.message || 'Submission error');
     }
   };
 
@@ -74,7 +79,7 @@ const PropertyDetail = () => {
      if (!user) return navigate('/customer/login');
      
      if (requestStatus === 'rejected') {
-        return toast.error('This inquiry was denied. Communication is blocked.');
+        return toast.error('This inquiry was denied.');
      }
 
      if (existingChatId) {
@@ -82,10 +87,10 @@ const PropertyDetail = () => {
      }
 
      if (requestStatus === 'pending' || requestStatus === 'approved') {
-        const tid = toast.loading('Syncing secure frequency...');
+        const tid = toast.loading('Opening chat...');
         const cid = await checkExistingStatus();
         if (cid) {
-           toast.success('Frequency established.', { id: tid });
+           toast.success('Connected.', { id: tid });
            navigate(`/chats/${cid}`);
         } else {
            toast.error('Channel routing to general hub.', { id: tid });
@@ -94,189 +99,168 @@ const PropertyDetail = () => {
         return;
      }
 
-     toast.error('Submit an inspection request first to open a direct channel.');
+     toast.error('Submit an inquiry first to message the owner.');
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center animate-pulse text-indigo-600 font-serif italic text-xl">Establishing secure link...</div>;
-  if (!property) return <div className="text-center p-20 text-slate-400 font-serif">Asset Frequency Lost.</div>;
+  const handleFavorite = async () => {
+    if (!user) return navigate('/customer/login');
+    setFavoriteLoading(true);
+    try {
+        const res = await favoriteProperty(id);
+        setIsFavorited(res.data.data.isFavorited);
+        toast.success(res.data.data.isFavorited ? 'Property added to favorites.' : 'Property removed from favorites.');
+    } catch (err) {
+        toast.error('Favorite sync failure.');
+    } finally {
+        setFavoriteLoading(false);
+    }
+  };
+
+  if (loading) return <div className="h-screen flex items-center justify-center text-[#C2410C] font-bold text-lg">Loading property...</div>;
+  if (!property) return <div className="text-center p-20 text-gray-400">Property not found.</div>;
 
   const allImages = property.images || [];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      
-      {/* Lightbox / Full Gallery Overlay */}
-      <AnimatePresence>
-        {showLightbox && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-xl flex flex-col p-10">
-                 <div className="flex justify-between items-center mb-10">
-                    <div className="text-white">
-                        <h2 className="text-3xl font-serif italic font-black uppercase tracking-tighter italic">Portfolio Expansion</h2>
-                        <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Viewing selection {activeImageIdx + 1} of {allImages.length}</p>
-                    </div>
-                    <button onClick={() => setShowLightbox(false)} className="p-4 bg-white/10 text-white rounded-full hover:bg-white/20 transition-all">
-                        <X size={24} />
-                    </button>
-                 </div>
-                 
-                 <div className="flex-1 flex items-center justify-center relative">
-                    <button onClick={() => setActiveImageIdx(prev => (prev > 0 ? prev - 1 : allImages.length - 1))} className="absolute left-0 p-6 bg-white/5 text-white rounded-full hover:bg-white/10 transition-all -translate-x-1/2 md:translate-x-0">
-                        <ChevronLeft size={32} />
-                    </button>
-                    
-                    <motion.img 
-                        key={activeImageIdx}
-                        initial={{ opacity: 0, scale: 0.9, x: 20 }}
-                        animate={{ opacity: 1, scale: 1, x: 0 }}
-                        src={`http://localhost:5000${allImages[activeImageIdx]}`} 
-                        className="max-h-[70vh] rounded-[3rem] shadow-2xl object-contain"
-                    />
-
-                    <button onClick={() => setActiveImageIdx(prev => (prev < allImages.length - 1 ? prev + 1 : 0))} className="absolute right-0 p-6 bg-white/5 text-white rounded-full hover:bg-white/10 transition-all translate-x-1/2 md:translate-x-0">
-                        <ChevronRight size={32} />
-                    </button>
-                 </div>
-
-                 <div className="mt-10 flex gap-4 overflow-x-auto custom-scrollbar pb-6 px-10">
-                    {allImages.map((img, i) => (
-                        <button key={i} onClick={() => setActiveImageIdx(i)} className={`w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all shrink-0 ${activeImageIdx === i ? 'border-indigo-500 scale-110' : 'border-white/5'}`}>
-                            <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover" alt="Thumb" />
-                        </button>
-                    ))}
-                 </div>
-            </motion.div>
-        )}
-      </AnimatePresence>
-
-      <div className="flex justify-between items-center mb-10">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-400 hover:text-slate-900 transition-all font-black text-[10px] uppercase tracking-widest leading-none">
-              <ChevronLeft size={16} /> Return to Portfolio
-          </button>
-          <div className="flex items-center gap-4 text-slate-400 text-[10px] uppercase tracking-widest font-black">
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full leading-none">
-                  <Eye size={12} /> {property.views || 0} Market Views
-              </span>
-              <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full leading-none">
-                  <ImageIcon size={12} /> {allImages.length} Visuals
-              </span>
-          </div>
-      </div>
-
-      <div className="flex flex-col lg:flex-row gap-12">
-        <div className="grow space-y-12">
-            
-            {/* Interactive Hero Gallery Grid */}
-            <div className="grid grid-cols-4 gap-4 h-[600px]">
-                <div 
-                    onClick={() => { setActiveImageIdx(0); setShowLightbox(true); }}
-                    className="col-span-4 md:col-span-3 rounded-[3rem] overflow-hidden relative group shadow-2xl cursor-pointer"
+    <div className="min-h-screen bg-white py-8">
+      <div className="max-w-6xl mx-auto px-4">
+        
+        {/* Back navigation */}
+        <div className="mb-6 flex items-center justify-between">
+            <button onClick={() => navigate(-1)} className="text-[#C2410C] hover:underline flex items-center gap-1 font-bold text-xs uppercase tracking-widest">
+                <ChevronLeft size={16} /> Back to Listings
+            </button>
+            <div className="flex gap-4">
+                <button 
+                    onClick={handleFavorite} 
+                    disabled={favoriteLoading}
+                    className={`flex items-center gap-2 px-4 py-2 rounded border text-[10px] font-bold uppercase tracking-widest transition-colors ${
+                        isFavorited ? 'bg-red-50 border-red-200 text-red-600' : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                    }`}
                 >
-                    <img src={`http://localhost:5000${allImages[0]}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={property.name} />
-                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent p-12">
-                         <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white rounded-full text-[9px] font-black tracking-widest uppercase mb-4 shadow-xl">Verified Offering</div>
-                         <h1 className="text-4xl md:text-6xl font-serif italic text-white font-black tracking-tighter italic">{property.name}</h1>
-                         <p className="text-white/70 font-bold text-sm mt-2 flex items-center gap-2"><MapPin size={16} className="text-sky-400" /> {property.address}</p>
-                    </div>
-                </div>
-
-                <div className="hidden md:flex flex-col gap-4">
-                    {allImages.slice(1, 4).map((img, i) => (
-                        <div 
-                            key={i} 
-                            onClick={() => { setActiveImageIdx(i+1); setShowLightbox(true); }}
-                            className="flex-1 rounded-[2.5rem] overflow-hidden shadow-xl group cursor-pointer border border-white relative"
-                        >
-                            <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt="Spec View" />
-                            {i === 2 && allImages.length > 4 && (
-                                <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center text-white flex-col gap-1 transition-all group-hover:bg-slate-900/80">
-                                   <span className="text-2xl font-serif italic font-black">+{allImages.length - 4}</span>
-                                   <span className="text-[9px] font-black uppercase tracking-widest">Expansion</span>
-                                </div>
-                            )}
-                        </div>
-                    ))}
-                </div>
-            </div>
-
-            {/* Spec Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {[
-                    { label: 'Type', value: property.type, icon: Layout, color: 'text-indigo-600' },
-                    { label: 'Configuration', value: property.bhk + ' BHK', icon: Bed, color: 'text-sky-500' },
-                    { label: 'Floor Level', value: property.floor, icon: Building, color: 'text-rose-500' },
-                    { label: 'Area Details', value: (property.dimensions || '800') + ' SqFt', icon: MapIcon, color: 'text-emerald-500' }
-                ].map((spec, i) => (
-                    <div key={i} className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group hover:border-indigo-100 transition-all">
-                         <div className={`p-4 rounded-2xl bg-slate-50 mb-4 ${spec.color} shadow-sm`}><spec.icon size={24} /></div>
-                         <span className="text-[9px] font-black uppercase text-slate-400 tracking-widest mb-1">{spec.label}</span>
-                         <span className="text-lg font-black text-slate-900">{spec.value}</span>
-                    </div>
-                ))}
-            </div>
-
-            {/* Description Area */}
-            <div className="bg-white p-12 rounded-[3.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-12 opacity-[0.02] -rotate-12 translate-x-10 translate-y-10">
-                    <Layout size={200} />
-                </div>
-                <div className="flex items-center gap-3 mb-8">
-                   <div className="h-10 w-1.5 bg-indigo-600 rounded-full"></div>
-                   <h2 className="text-4xl font-serif italic text-slate-900 font-black italic">Property Description</h2>
-                </div>
-                <p className="text-slate-500 text-lg leading-relaxed font-normal">
-                    Step into a masterpiece of modern architecture. This {property.bhk} BHK {property.type} situated at {property.address} is the epitome of refined living. Boasting a strategic location on the {property.floor} floor, this space has been designed with premium high-end aesthetics and maximum utility in mind.
-                </p>
-                
-                {property.locationLink && (
-                    <div className="mt-12 p-8 bg-indigo-50 border border-indigo-100 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div>
-                            <h4 className="text-indigo-900 font-serif italic font-black text-xl mb-1 italic">Location Intelligence</h4>
-                            <p className="text-indigo-600 text-xs font-bold uppercase tracking-widest">Verify coordinates via Google Maps Protocol</p>
-                        </div>
-                        <a href={property.locationLink} target="_blank" rel="noreferrer" className="bg-indigo-600 text-white px-8 py-4 rounded-2xl flex items-center gap-3 text-[10px] font-black uppercase tracking-widest shadow-xl hover:bg-black transition-all hover:-translate-y-1">OPEN MAPS <ExternalLink size={16} /></a>
-                    </div>
-                )}
+                    <Heart size={14} fill={isFavorited ? "currentColor" : "none"} />
+                    {isFavorited ? 'Saved' : 'Save Property'}
+                </button>
             </div>
         </div>
 
-        {/* Action Sidebar */}
-        <div className="w-full lg:w-96 shrink-0">
-            <div className="bg-white rounded-[3.5rem] border border-slate-100 shadow-2xl p-10 lg:sticky lg:top-24">
-                <div className="flex justify-between items-center mb-10">
-                   <div>
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Market Status</p>
-                       <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${property.status === 'open' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
-                           {property.status === 'open' ? 'Ready for Possession' : 'Occupied'}
-                       </span>
-                   </div>
-                   <div className="text-right">
-                       <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Metrics</p>
-                       <div className="flex items-center gap-2 text-indigo-600 font-black"><Eye size={16} /> <span className="text-sm">{property.views || 0}</span></div>
-                   </div>
+        {/* Main Header */}
+        <div className="bg-white p-6 rounded border border-gray-200 shadow-sm mb-8">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-900 mb-2 uppercase tracking-tight">{property.name}</h1>
+                    <p className="text-gray-500 flex items-center gap-2 text-xs font-medium">
+                        <MapPin size={16} className="text-[#C2410C]" /> {property.address}
+                    </p>
                 </div>
+                <div className="bg-[#FFF7ED] p-4 rounded border border-[#FFEDD5] text-right min-w-[200px]">
+                    <p className="text-[10px] font-bold text-[#C2410C] uppercase tracking-widest mb-1">Monthly Rent</p>
+                    <p className="text-2xl font-bold text-gray-900">₹{property.price?.toLocaleString() || 'N/A'}</p>
+                </div>
+            </div>
+        </div>
 
-                <div className="space-y-6">
-                    {requestStatus === 'idle' ? (
-                        <button onClick={handleRequestAppointment} className="w-full bg-slate-900 hover:bg-black text-white py-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] shadow-2xl transition-all hover:-translate-y-1">Request Inspection</button>
-                    ) : ( 
-                        <div className={`w-full py-6 rounded-2xl text-[11px] font-black uppercase tracking-[0.3em] text-center shadow-inner border flex items-center justify-center gap-3 ${
-                            requestStatus === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-100' :
-                            requestStatus === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100'
-                        }`}>
-                            {requestStatus === 'pending' && <><Clock size={16}/> INQUIRY SENT</>}
-                            {requestStatus === 'approved' && <><ShieldCheck size={16}/> VISIT SECURED</>}
-                            {requestStatus === 'rejected' && <><Lock size={16}/> REQUEST DENIED</>}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column: Photos and Details */}
+            <div className="lg:col-span-2 space-y-8">
+                {/* Simple Gallery */}
+                <div className="bg-white rounded border border-gray-200 shadow-sm overflow-hidden">
+                    <div className="h-[400px] md:h-[500px] overflow-hidden bg-gray-50 flex items-center justify-center">
+                        <img src={`http://localhost:5000${allImages[activeImageIdx]}`} className="max-w-full max-h-full object-contain" alt="Property main" />
+                    </div>
+                    {allImages.length > 1 && (
+                        <div className="p-4 flex gap-2 overflow-x-auto border-t border-gray-100">
+                            {allImages.map((img, i) => (
+                                <button key={i} onClick={() => setActiveImageIdx(i)} className={`w-20 h-20 rounded border-2 transition-all shrink-0 overflow-hidden ${activeImageIdx === i ? 'border-[#C2410C]' : 'border-gray-100'}`}>
+                                    <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover" alt="Thumb" />
+                                </button>
+                            ))}
                         </div>
                     )}
+                </div>
+
+                {/* Key Specs */}
+                <div className="bg-white p-6 rounded border border-gray-200 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="flex flex-col items-center text-center">
+                        <Home size={20} className="text-[#C2410C] mb-2" />
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Type</span>
+                        <span className="text-sm font-bold text-gray-800 uppercase">{property.type}</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center">
+                        <Bed size={20} className="text-[#C2410C] mb-2" />
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Conf.</span>
+                        <span className="text-sm font-bold text-gray-800">{property.bhk} BHK</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center">
+                        <Building size={20} className="text-[#C2410C] mb-2" />
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Floor</span>
+                        <span className="text-sm font-bold text-gray-800 uppercase">{property.floor}</span>
+                    </div>
+                    <div className="flex flex-col items-center text-center">
+                        <Maximize size={20} className="text-[#C2410C] mb-2" />
+                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Area</span>
+                        <span className="text-sm font-bold text-gray-800">{property.dimensions || '800'} SqFt</span>
+                    </div>
+                </div>
+
+                {/* Description */}
+                <div className="bg-white p-8 rounded border border-gray-200 shadow-sm">
+                    <h2 className="text-sm font-bold text-gray-900 mb-6 border-b border-gray-100 pb-4 uppercase tracking-widest">Description</h2>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                        This {property.bhk} BHK {property.type} is located in {property.address}. 
+                        Situated on the {property.floor} floor, it offers excellent ventilation and a professional layout. 
+                        Suitable for tenants looking for a well-maintained property.
+                    </p>
                     
-                    <div className="flex items-center gap-4">
+                    {property.locationLink && (
+                        <div className="mt-8 pt-8 border-t border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <span className="text-gray-500 text-xs font-bold uppercase tracking-tight">Location Verification:</span>
+                            <a href={property.locationLink} target="_blank" rel="noreferrer" className="bg-gray-900 hover:bg-black text-white px-6 py-2 rounded font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 transition-colors">
+                                <ExternalLink size={14} /> View Map
+                            </a>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Right Column: Actions */}
+            <div className="space-y-6">
+                <div className="bg-white p-6 rounded border border-gray-200 shadow-sm sticky top-24">
+                    <div className="mb-6 space-y-4">
+                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                            <span className="text-gray-400">Availability:</span>
+                            <span className={property.status === 'open' ? 'text-emerald-600' : 'text-red-600'}>
+                                {property.status === 'open' ? 'Active' : 'Closed'}
+                            </span>
+                        </div>
+                        <div className="flex justify-between items-center text-[10px] font-bold uppercase tracking-widest">
+                            <span className="text-gray-400">Asset Views:</span>
+                            <span className="text-gray-900">{property.views || 0}</span>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        {requestStatus === 'idle' ? (
+                            <button onClick={handleRequestAppointment} className="w-full bg-[#C2410C] hover:bg-[#9A3412] text-white py-3 rounded font-bold text-xs uppercase tracking-widest transition-all">
+                                Request Visit
+                            </button>
+                        ) : ( 
+                            <div className={`w-full py-3 rounded font-bold text-[10px] uppercase tracking-widest text-center border ${
+                                requestStatus === 'pending' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                requestStatus === 'approved' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-red-50 text-red-700 border-red-200'
+                            }`}>
+                                {requestStatus}
+                            </div>
+                        )}
+                        
                         <button 
                             onClick={handleMessageTap}
-                            className={`p-4 rounded-xl shadow-sm transition-all border flex-1 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest min-h-[56px] ${
-                                existingChatId && requestStatus !== 'rejected' ? 'bg-indigo-600 text-white border-indigo-500 hover:bg-black' : 'bg-white text-slate-400 border-slate-200 hover:text-slate-900'
+                            className={`w-full py-3 rounded font-bold text-xs uppercase tracking-widest border transition-all flex items-center justify-center gap-2 ${
+                                existingChatId && requestStatus !== 'rejected' ? 'bg-gray-900 text-white border-gray-900 hover:bg-black' : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
                             }`}
                         >
-                            <MessageSquare size={18} /> {existingChatId && requestStatus !== 'rejected' ? 'ENTER CHAT' : 'CHANNELS'}
+                            <MessageSquare size={16} /> 
+                            {existingChatId && requestStatus !== 'rejected' ? 'Open Chat' : 'Message Owner'}
                         </button>
                     </div>
                 </div>

@@ -3,7 +3,6 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { loginUser } from '../services/api';
 import { Lock, Mail, User, ShieldCheck, ChevronRight, Building } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const CustomerLogin = () => {
@@ -29,119 +28,85 @@ const CustomerLogin = () => {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-80px)] bg-white flex-row-reverse">
-      
-      {/* Visual Identity Side */}
-      <div className="hidden lg:block lg:w-1/2 relative bg-slate-900 overflow-hidden">
-        <motion.img 
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 0.6, scale: 1 }}
-          transition={{ duration: 1.2 }}
+    <div className="flex min-h-[calc(100vh-64px)] bg-white">
+      <div className="hidden lg:block lg:w-1/2 relative bg-gray-900 border-r border-gray-200 overflow-hidden">
+        <img 
           src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?q=80&w=1200" 
-          alt="Luxury Living Room" 
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 hover:scale-110"
+          alt="Modern Architecture" 
+          className="absolute inset-0 w-full h-full object-cover opacity-50"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent flex flex-col justify-end p-20">
-            <motion.h2 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-6xl font-serif font-black text-white mb-6 leading-tight uppercase italic-none tracking-tighter"
-            >
-                Find Your <br/> Perfect Home.
-            </motion.h2>
-            <motion.p 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="text-slate-400 text-xl font-medium max-w-md leading-relaxed"
-            >
-                Browse thousands of verified, exclusive properties directly from owners.
-            </motion.p>
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent flex flex-col justify-end p-16">
+            <h2 className="text-4xl font-bold text-white mb-4 uppercase tracking-tight">HouseMate Enterprise</h2>
+            <p className="text-gray-400 text-lg font-medium max-w-sm">Verified properties directly from trusted owners.</p>
         </div>
       </div>
 
-      {/* Form Side */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white relative">
-        <div className="w-full max-w-md">
-          
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-12">
-              <div className="w-16 h-16 bg-slate-900 text-white rounded-[1.5rem] flex items-center justify-center mb-8 shadow-2xl">
-                  <User size={32} />
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-[#F8FAFC]">
+        <div className="w-full max-w-md bg-white p-10 rounded border border-gray-200 shadow-sm">
+          <div className="mb-10">
+              <div className="w-12 h-12 bg-gray-900 text-white rounded flex items-center justify-center mb-6">
+                  <User size={24} />
               </div>
-              <h1 className="text-5xl font-serif font-black text-slate-900 mb-4 tracking-tighter uppercase italic-none">Customer login</h1>
-              <p className="text-slate-400 font-medium text-lg leading-relaxed">Sign in to your account to save favorites and chat with owners.</p>
-          </motion.div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 uppercase tracking-widest">Customer Login</h1>
+              <p className="text-gray-500 font-medium text-sm">Sign in to manage your inquiries and favorites.</p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="space-y-3">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Identity Email</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                  <Mail size={18} />
-                </div>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
+              <div className="relative">
+                <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                 <input 
                     type="email" 
                     required 
-                    className="pl-14 w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-600 focus:bg-white text-xs font-black uppercase tracking-widest outline-none transition-all hover:bg-white" 
-                    placeholder="ENTER YOUR EMAIL..." 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                    placeholder="name@company.com" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
                 />
               </div>
             </div>
 
-            <div className="space-y-3">
-              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Secure Password</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none text-slate-300 group-focus-within:text-indigo-600 transition-colors">
-                  <Lock size={18} />
-                </div>
+            <div>
+              <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Password</label>
+              <div className="relative">
+                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" />
                 <input 
                     type="password" 
                     required 
-                    className="pl-14 w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-600 focus:bg-white text-xs font-black uppercase tracking-widest outline-none transition-all hover:bg-white" 
-                    placeholder="ENTER YOUR PASSWORD..." 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                    placeholder="••••••••" 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
                 />
               </div>
-              <div className="flex justify-end pt-2">
-                <Link to="/forgot-password" virtual="true" className="text-[9px] font-black text-indigo-600 uppercase tracking-widest hover:text-slate-900 transition-colors">Forgot password?</Link>
+              <div className="flex justify-end mt-2">
+                <Link to="/forgot-password" virtual="true" className="text-[10px] font-bold text-[#C2410C] uppercase tracking-widest hover:underline">Forgot password?</Link>
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="w-full py-6 bg-slate-900 hover:bg-black text-white rounded-2xl md:rounded-3xl font-black tracking-[0.4em] text-[12px] shadow-2xl transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-50 mt-4 uppercase border border-slate-900">
-              {loading ? 'Authenticating...' : 'Sign In Now'}
+            <button type="submit" disabled={loading} className="btn-primary w-full h-11 uppercase text-[11px] tracking-widest">
+              {loading ? 'Authenticating...' : 'Sign In'}
             </button>
           </form>
 
-          <div className="mt-12 flex flex-col gap-6">
-              <div className="pt-10 border-t border-slate-50 flex items-center justify-between text-[11px] font-black uppercase tracking-widest">
-                <span className="text-slate-400">No account yet?</span>
-                <Link to="/customer/register" className="text-indigo-600 hover:text-slate-900 border-b-2 border-indigo-600/10 hover:border-slate-900 transition-all pb-1">Create Account</Link>
+          <div className="mt-10 pt-8 border-t border-gray-100 flex flex-col gap-6">
+              <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest">
+                <span className="text-gray-400">New user?</span>
+                <Link to="/customer/register" className="text-[#C2410C] hover:underline">Create Account</Link>
               </div>
 
-              {/* Portal Switcher to prevent confusion */}
-              <Link to="/tenant/login" className="flex items-center justify-between p-6 bg-indigo-50/30 rounded-3xl border border-indigo-100 hover:bg-indigo-50 transition-all group">
-                <div className="flex items-center gap-4">
-                    <div className="bg-white p-2 rounded-xl border border-indigo-100 text-indigo-600 shadow-sm group-hover:scale-110 transition-transform">
-                        <Building size={18} />
-                    </div>
+              <Link to="/tenant/login" className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded group hover:bg-gray-100 transition-colors">
+                <div className="flex items-center gap-3">
+                    <Building size={16} className="text-gray-400" />
                     <div>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-900 leading-none mb-1">Are you a property owner?</p>
-                        <p className="text-[9px] font-medium text-indigo-400 uppercase tracking-widest">Switch to Owner Portal</p>
+                        <p className="text-[9px] font-bold text-gray-900 uppercase tracking-widest mb-0.5">Are you an owner?</p>
+                        <p className="text-[8px] font-bold text-[#C2410C] uppercase tracking-widest">Switch to Owner Portal</p>
                     </div>
                 </div>
-                <ChevronRight size={16} className="text-indigo-600 group-hover:translate-x-1 transition-transform" />
+                <ChevronRight size={14} className="text-gray-300 group-hover:text-[#C2410C] transition-colors" />
               </Link>
           </div>
-        </div>
-
-        {/* Status Indicator */}
-        <div className="absolute top-10 right-10 hidden xl:flex items-center gap-3 bg-slate-50/50 px-4 py-2 rounded-full border border-slate-100 backdrop-blur-sm">
-            <ShieldCheck size={14} className="text-indigo-600" />
-            <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Home Seeker Node</span>
         </div>
       </div>
     </div>

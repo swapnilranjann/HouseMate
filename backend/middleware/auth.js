@@ -1,23 +1,34 @@
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 const response = require('../utils/response');
 
-const auth = (req, res, next) => {
+const auth = async (req, res, next) => {
   try {
     const token = req.header('Authorization')?.replace('Bearer ', '');
     if (!token) {
-      return response.unauthorized(res, 'Identity verification failed. No token provided.');
+      return response.unauthorized(res, 'Authentication required. No session token detected.');
     }
 
-    const verified = jwt.verify(token, process.env.JWT_SECRET);
-    if (!verified) {
-      return response.unauthorized(res, 'Security handshake failed. Invalid or expired session.');
-    }
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      
+      // Verify user still exists in database
+      const user = await User.findById(decoded.id);
+      if (!user) {
+        return response.unauthorized(res, 'Security breach. Account no longer exists.');
+      }
 
-    req.user = verified;
-    next();
+      req.user = decoded;
+      next();
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        return response.unauthorized(res, 'Session expired. Please re-authenticate your identity.');
+      }
+      return response.unauthorized(res, 'Invalid security token identification failed.');
+    }
   } catch (err) {
-    console.error('Auth Middleware Exception:', err.message);
-    response.unauthorized(res, 'Session synchronisation failure. Please log in again.');
+    console.error('CRITICAL_AUTH_FAILURE:', err.stack);
+    response.error(res, 'Infrastructure error during authentication handshake.');
   }
 };
 
