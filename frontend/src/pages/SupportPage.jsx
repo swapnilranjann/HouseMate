@@ -19,7 +19,7 @@ const SupportPage = () => {
   const fetchTickets = async () => {
     try {
       const { data } = await getMyTickets();
-      setTickets(data);
+      setTickets(data.data); // Standardised response util returns { success, data, message }
     } catch (err) {
       toast.error('Failed to fetch support history');
     } finally {

@@ -48,9 +48,15 @@ const PropertyCard = ({ property }) => {
       </div>
 
       <div className="p-8 grow flex flex-col">
-        <h3 className="text-2xl md:text-3xl font-serif font-black text-slate-900 group-hover:text-indigo-600 transition-colors mb-2 truncate uppercase italic-none">
-          {property.name}
-        </h3>
+        <div className="flex justify-between items-start mb-2 gap-4">
+            <h3 className="text-2xl md:text-3xl font-serif font-black text-slate-900 group-hover:text-indigo-600 transition-colors truncate uppercase italic-none">
+                {property.name}
+            </h3>
+            <div className="text-right shrink-0">
+                <p className="text-[14px] font-black text-slate-900 tracking-tighter">₹{property.price?.toLocaleString() || 'N/A'}</p>
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">/ MONTH</p>
+            </div>
+        </div>
         <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest flex items-center gap-2 mb-8 leading-none">
           <MapPin size={14} className="text-sky-500" /> {property.address}
         </p>

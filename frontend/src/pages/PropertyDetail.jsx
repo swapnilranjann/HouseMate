@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { getPropertyById, requestAppointment, incrementPropertyView, getMyAppointments, getChats } from '../services/api';
-import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building, Lock, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { getPropertyById, requestAppointment, incrementPropertyView, getMyAppointments, getChats, favoriteProperty } from '../services/api';
+import { MapPin, Bed, Bath, Maximize, Calendar, MessageSquare, Share2, ShieldCheck, User, Clock, Eye, Layout, ChevronLeft, Map as MapIcon, ExternalLink, Building, Lock, X, ChevronRight, Image as ImageIcon, Heart } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
@@ -17,16 +17,22 @@ const PropertyDetail = () => {
   const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [showLightbox, setShowLightbox] = useState(false);
 
+  const [isFavorited, setIsFavorited] = useState(false);
+  const [favoriteLoading, setFavoriteLoading] = useState(false);
+
   useEffect(() => {
     fetchProperty();
     incrementPropertyView(id);
-    if (user) checkExistingStatus();
+    if (user) {
+        checkExistingStatus();
+        setIsFavorited(user.favorites?.includes(id));
+    }
   }, [id, user]);
 
   const fetchProperty = async () => {
     try {
-      const data = await getPropertyById(id);
-      setProperty(data);
+      const { data } = await getPropertyById(id);
+      setProperty(data.data); // data is the axios body, which contains { success, data, message }
     } catch (err) {
       console.error(err);
     } finally {
@@ -97,6 +103,20 @@ const PropertyDetail = () => {
      toast.error('Submit an inspection request first to open a direct channel.');
   };
 
+  const handleFavorite = async () => {
+    if (!user) return navigate('/customer/login');
+    setFavoriteLoading(true);
+    try {
+        const res = await favoriteProperty(id);
+        setIsFavorited(res.data.data.isFavorited);
+        toast.success(res.data.data.isFavorited ? 'Asset added to favorites.' : 'Asset removed from favorites.');
+    } catch (err) {
+        toast.error('Favorite sync failure.');
+    } finally {
+        setFavoriteLoading(false);
+    }
+  };
+
   if (loading) return <div className="h-screen flex items-center justify-center animate-pulse text-indigo-600 font-serif italic text-xl">Establishing secure link...</div>;
   if (!property) return <div className="text-center p-20 text-slate-400 font-serif">Asset Frequency Lost.</div>;
 
@@ -153,6 +173,14 @@ const PropertyDetail = () => {
               <ChevronLeft size={16} /> Return to Portfolio
           </button>
           <div className="flex items-center gap-4 text-slate-400 text-[10px] uppercase tracking-widest font-black">
+              <button 
+                onClick={handleFavorite}
+                disabled={favoriteLoading}
+                className={`flex items-center gap-1.5 px-4 py-1.5 transition-all rounded-full leading-none border ${isFavorited ? 'bg-rose-50 border-rose-100 text-rose-500' : 'bg-slate-50 border-slate-100 text-slate-400 hover:bg-rose-50 hover:text-rose-500'}`}
+              >
+                  <Heart size={14} fill={isFavorited ? "currentColor" : "none"} className={favoriteLoading ? 'animate-pulse' : ''} /> 
+                  {isFavorited ? 'SAVED' : 'FAVORITE'}
+              </button>
               <span className="flex items-center gap-1.5 px-3 py-1 bg-slate-50 border border-slate-100 rounded-full leading-none">
                   <Eye size={12} /> {property.views || 0} Market Views
               </span>
@@ -174,7 +202,13 @@ const PropertyDetail = () => {
                     <img src={`http://localhost:5000${allImages[0]}`} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" alt={property.name} />
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-900/70 via-transparent to-transparent p-12">
                          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-indigo-600 text-white rounded-full text-[9px] font-black tracking-widest uppercase mb-4 shadow-xl">Verified Offering</div>
-                         <h1 className="text-4xl md:text-6xl font-serif italic text-white font-black tracking-tighter italic">{property.name}</h1>
+                         <div className="flex justify-between items-start">
+                            <h1 className="text-4xl md:text-6xl font-serif italic text-white font-black tracking-tighter italic">{property.name}</h1>
+                            <div className="text-right">
+                                <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-1">Monthly Asset Fee</p>
+                                <p className="text-4xl font-serif text-white font-black tracking-tighter">₹{property.price?.toLocaleString() || 'N/A'}</p>
+                            </div>
+                         </div>
                          <p className="text-white/70 font-bold text-sm mt-2 flex items-center gap-2"><MapPin size={16} className="text-sky-400" /> {property.address}</p>
                     </div>
                 </div>

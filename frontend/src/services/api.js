@@ -24,10 +24,7 @@ export const changePassword = (data) => api.put('/auth/change-password', data);
 
 // --- Property APIs ---
 export const getProperties = (type) => api.get('/properties', { params: { type } });
-export const getPropertyById = async (id) => {
-    const { data } = await api.get('/properties');
-    return data.find(p => p._id === id);
-};
+export const getPropertyById = (id) => api.get(`/properties/${id}`);
 export const createProperty = (data) => api.post('/properties', data, {
     headers: { 'Content-Type': 'multipart/form-data' }
 });

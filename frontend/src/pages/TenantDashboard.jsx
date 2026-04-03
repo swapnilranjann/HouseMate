@@ -18,7 +18,7 @@ const TenantDashboard = () => {
   const location = useLocation();
 
   const [formData, setFormData] = useState({
-    name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House', locationLink: ''
+    name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House', locationLink: '', price: ''
   });
   const [images, setImages] = useState([]);
 
@@ -38,9 +38,11 @@ const TenantDashboard = () => {
         getChats()
       ]);
       const user = JSON.parse(localStorage.getItem('house_user'));
-      setProperties(pRes.data.filter(p => p.listerId._id === user.id));
-      setAppointments(aRes.data);
-      setChats(cRes.data);
+      
+      // Standardised response util returns { success, data, message }
+      setProperties(pRes.data.data.filter(p => p.listerId._id === user.id));
+      setAppointments(aRes.data.data);
+      setChats(cRes.data.data);
     } catch (err) {
        console.error(err);
     } finally {
@@ -76,7 +78,7 @@ const TenantDashboard = () => {
     try {
       await createProperty(data);
       setShowForm(false);
-      setFormData({ name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House', locationLink: '' });
+      setFormData({ name: '', number: '', address: '', floor: '', bhk: '1', dimensions: '', roadInfo: '', type: 'House', locationLink: '', price: '' });
       setImages([]);
       fetchData();
       toast.success('Property Added! Safe and Verified.', { id: loadingToast });
@@ -143,8 +145,12 @@ const TenantDashboard = () => {
                     <form onSubmit={handleCreateProperty} className="p-12 md:p-16 grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16">
                          <div className="space-y-10">
                             <h4 className="text-[10px] font-black text-slate-900 uppercase tracking-[0.3em] border-b border-slate-100 pb-4">01. Home Type</h4>
-                            <div className="space-y-6">
+                             <div className="space-y-6">
                                 <input type="text" placeholder="ENTER HOUSE NAME (E.G. SKYLINE VILLA)..." required className="w-full px-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-8 focus:ring-sky-500/5 focus:border-sky-500 text-xs font-black tracking-widest transition-all outline-none" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                                <div className="relative">
+                                    <span className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 font-black text-xs">₹</span>
+                                    <input type="number" placeholder="MONTHLY RENT / PRICE..." required className="w-full pl-12 pr-8 py-5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-8 focus:ring-sky-500/5 focus:border-sky-500 text-xs font-black tracking-widest transition-all outline-none" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+                                </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     {['Flat', 'House', 'Villa', 'Office', 'Shop'].map(t => (
                                         <button key={t} type="button" onClick={() => setFormData({...formData, type: t})} className={`py-4 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${formData.type === t ? 'bg-sky-600 border-sky-600 text-white shadow-xl' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-300'}`}>
@@ -232,7 +238,13 @@ const TenantDashboard = () => {
                                 </div>
                             </div>
                             <div className="p-10 grow flex flex-col">
-                                <h3 className="text-3xl font-serif font-black text-slate-900 group-hover:text-sky-600 transition-colors mb-2 truncate uppercase italic-none tracking-tighter">{p.name}</h3>
+                                <div className="flex justify-between items-center mb-2 gap-4">
+                                    <h3 className="text-3xl font-serif font-black text-slate-900 group-hover:text-sky-600 transition-colors truncate uppercase italic-none tracking-tighter">{p.name}</h3>
+                                    <div className="text-right shrink-0">
+                                        <p className="text-[12px] font-black text-slate-900 tracking-tighter leading-none">₹{p.price?.toLocaleString() || 'N/A'}</p>
+                                        <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">/ MONTH</p>
+                                    </div>
+                                </div>
                                 <p className="text-slate-400 font-bold text-[10px] uppercase tracking-widest flex items-center gap-3 mb-10"><MapPin size={16} className="text-sky-500" /> {p.address}</p>
                                 
                                 <div className="grid grid-cols-2 gap-4 mb-10">

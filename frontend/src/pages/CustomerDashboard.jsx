@@ -20,7 +20,7 @@ const CustomerDashboard = ({ isFavorites = false }) => {
   const fetchAppointments = async () => {
     try {
       const { data } = await getMyAppointments();
-      setAppointments(data);
+      setAppointments(data.data); // Standardised response util returns { success, data, message }
     } catch (err) {
       console.error(err);
     } finally {

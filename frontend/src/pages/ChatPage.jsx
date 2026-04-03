@@ -25,9 +25,10 @@ const ChatPage = () => {
   const fetchChatsList = async () => {
     try {
       const response = await getChats();
-      setChats(response.data);
+      const chatsData = response.data.data; // Standardised response util
+      setChats(chatsData);
       if (id) {
-        const active = response.data.find(c => c._id === id);
+        const active = chatsData.find(c => c._id === id);
         setActiveChat(active);
         setMessages(active?.messages || []);
       }
@@ -44,7 +45,7 @@ const ChatPage = () => {
       pollInterval = setInterval(async () => {
         try {
           const response = await getChatDetails(id);
-          setMessages(response.data.messages);
+          setMessages(response.data.data.messages); // Standardised response util
         } catch (err) {
           console.error("Poll error:", err);
         }
@@ -63,7 +64,7 @@ const ChatPage = () => {
 
     try {
       const response = await sendChatMessage(id, inputText);
-      setMessages([...messages, response.data]);
+      setMessages([...messages, response.data.data]); // Standardised response util
       setInputText('');
     } catch (err) {
       console.error("Send Error:", err);

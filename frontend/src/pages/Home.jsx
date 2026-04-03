@@ -18,7 +18,7 @@ const Home = () => {
   const fetchProps = async () => {
     try {
       const { data } = await getProperties();
-      setProperties(data);
+      setProperties(data.data); // Standardised response util returns { success, data, message }
     } catch (err) {
       console.error(err);
     } finally {
