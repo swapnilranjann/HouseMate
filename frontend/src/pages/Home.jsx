@@ -69,22 +69,22 @@ const Home = () => {
                 <div className="flex-1 relative flex items-center">
                     <input 
                         type="text" 
-                        placeholder="Organization Name Search" 
-                        className="w-full bg-[#FCFDFF] border border-gray-300 rounded px-10 py-2.5 text-sm outline-none focus:border-[#C2410C] transition-all"
+                        placeholder="Property Name or Location Search" 
+                        className="w-full bg-[#FCFDFF] border border-gray-300 rounded px-10 py-2.5 text-xs font-bold uppercase tracking-widest outline-none focus:border-[#C2410C] transition-all"
                         value={searchQuery}
                         onChange={e => setSearchQuery(e.target.value)}
                     />
-                    <Search className="absolute left-3 text-gray-400" size={16} />
-                    <button className="absolute right-3 text-gray-400 hover:text-gray-600"><Filter size={16}/></button>
+                    <Search className="absolute left-3 text-gray-400" size={14} />
+                    <button className="absolute right-3 text-gray-400 hover:text-gray-600"><Filter size={14}/></button>
                 </div>
                 <div className="flex-1 relative flex items-center">
                     <input 
                         type="text" 
-                        placeholder="Search By Created On Date" 
-                        className="w-full bg-[#FCFDFF] border border-gray-300 rounded px-10 py-2.5 text-sm outline-none focus:border-[#C2410C] transition-all"
+                        placeholder="Search By Created Date" 
+                        className="w-full bg-[#FCFDFF] border border-gray-300 rounded px-10 py-2.5 text-xs font-bold uppercase tracking-widest outline-none focus:border-[#C2410C] transition-all"
                     />
-                    <Search className="absolute left-3 text-gray-400" size={16} />
-                    <button className="absolute right-3 text-gray-400 hover:text-gray-600"><Filter size={16}/></button>
+                    <Search className="absolute left-3 text-gray-400" size={14} />
+                    <button className="absolute right-3 text-gray-400 hover:text-gray-600"><Filter size={14}/></button>
                 </div>
             </div>
             <div className="flex items-center gap-1">
