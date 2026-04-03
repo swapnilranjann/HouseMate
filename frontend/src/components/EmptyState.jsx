@@ -1,47 +1,39 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { PlusCircle, Search, Mail, AlertTriangle, MapPin, MessageSquare, ShieldCheck, UserCircle, Briefcase, ShoppingBag, Building, Layout, Home } from 'lucide-react';
 
-const EmptyState = ({ 
-  title, 
-  message, 
-  icon: Icon, 
-  actionText, 
-  actionLink, 
-  onAction,
-  color = "indigo"
-}) => {
-  const accentText = color === 'sky' ? 'text-sky-500' : 'text-indigo-600';
-  const decoColor = color === 'sky' ? 'decoration-sky-300' : 'decoration-indigo-300';
+const EmptyState = ({ title, message, icon: Icon, actionText, onAction, color = "orange" }) => {
+  const colorMap = {
+    orange: "text-[#C2410C] bg-[#FFF7ED] border-[#FFEDD5]",
+    emerald: "text-emerald-600 bg-emerald-50 border-emerald-100",
+    blue: "text-[#C2410C] bg-[#FFF7ED] border-[#FFEDD5]", // standardized
+    gray: "text-gray-500 bg-gray-50 border-gray-100"
+  };
+
+  const selectedColor = colorMap[color] || colorMap.orange;
 
   return (
-    <div className="py-24 text-center bg-white rounded-[4rem] border-2 border-dashed border-slate-100 flex flex-col items-center gap-6 shadow-inner animate-fade-in">
-        <div className={`w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center text-slate-200`}>
-             {Icon && <Icon size={40} />}
-        </div>
-        <div>
-            <h2 className="text-3xl font-serif italic text-slate-900 tracking-tighter uppercase leading-none mb-2 italic font-black">
-              {title}
-            </h2>
-            <p className="text-slate-400 mt-2 font-bold text-[10px] uppercase tracking-widest max-w-xs mx-auto">
-              {message}
-            </p>
-        </div>
-        
-        {actionLink ? (
-          <Link 
-            to={actionLink} 
-            className={`mt-4 bg-slate-900 text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all hover:-translate-y-1 block`}
-          >
-            {actionText}
-          </Link>
-        ) : actionText && (
-          <button 
-            onClick={onAction}
-            className={`mt-4 bg-slate-900 text-white px-10 py-4 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-2xl hover:bg-black transition-all hover:-translate-y-1`}
-          >
-            {actionText}
-          </button>
-        )}
+    <div className="flex flex-col items-center justify-center p-12 text-center bg-white border border-gray-200 rounded min-h-[300px]">
+      <div className={`w-16 h-16 rounded border flex items-center justify-center mb-6 shadow-sm ${selectedColor}`}>
+        {Icon ? <Icon size={32} /> : <Home size={32} />}
+      </div>
+      
+      <h2 className="text-sm font-bold text-gray-900 uppercase tracking-widest mb-2">
+        {title || "No data available"}
+      </h2>
+      
+      <p className="text-xs text-gray-500 font-medium max-w-sm mb-8 leading-relaxed">
+        {message || "We couldn't find any information to display at this time. Please try refreshing or checking back later."}
+      </p>
+
+      {onAction && (
+        <button 
+          onClick={onAction}
+          className="btn-primary uppercase text-[10px] tracking-[2px] h-10 px-6 shadow-sm"
+        >
+          {actionText || "Get Started"}
+        </button>
+      )}
     </div>
   );
 };

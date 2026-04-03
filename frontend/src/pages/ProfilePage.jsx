@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { updateProfile, changePassword } from '../services/api';
-import { User, Mail, Phone, Lock, Save, ShieldCheck, UserCircle, Briefcase, Key, ShieldAlert } from 'lucide-react';
+import { User, Mail, Phone, Lock, Save, UserCircle, Key } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import DashboardHeader from '../components/DashboardHeader';
@@ -45,141 +45,128 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-      
+    <div className="max-w-4xl mx-auto py-6">
       <DashboardHeader 
-        title={<>My <span className="text-indigo-600">Profile</span></>}
-        subtitle={`Manage your personal account details. You are logged in as a verified ${user.role}.`}
+        title="Profile Settings"
+        subtitle="Manage your personal information and security preferences."
         icon={UserCircle}
-        roleLabel="Account Settings"
-        accentColor="indigo"
+        roleLabel="Settings"
         stats={[
-           { label: "Account Role", value: user.role.toUpperCase() },
-           { label: "Verified", value: "YES", highlight: true }
+           { label: "Role", value: user.role.toUpperCase() },
+           { label: "Status", value: "Verified", highlight: true }
         ]}
       />
 
-      <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-[2.5rem] md:rounded-[3rem] border border-slate-100 shadow-2xl overflow-hidden">
-            
-            {/* Nav Tabs */}
-            <div className="flex border-b border-slate-50 bg-slate-50/30">
-                <button 
-                    onClick={() => setActiveTab('profile')}
-                    className={`flex-1 py-8 text-[11px] font-black uppercase tracking-[0.25em] transition-all border-b-4 ${activeTab === 'profile' ? 'text-indigo-600 border-indigo-600 bg-white scale-105' : 'text-slate-400 hover:text-slate-900 border-transparent'}`}
-                >
-                    Account Details
-                </button>
-                <button 
-                    onClick={() => setActiveTab('password')}
-                    className={`flex-1 py-8 text-[11px] font-black uppercase tracking-[0.25em] transition-all border-b-4 ${activeTab === 'password' ? 'text-indigo-600 border-indigo-600 bg-white scale-105' : 'text-slate-400 hover:text-slate-900 border-transparent'}`}
-                >
-                    Security & Password
-                </button>
-            </div>
+      <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+          <div className="flex border-b border-gray-200">
+              <button 
+                  onClick={() => setActiveTab('profile')}
+                  className={`px-8 py-4 text-[11px] font-bold uppercase tracking-widest transition-all border-b-2 ${activeTab === 'profile' ? 'text-[#C2410C] border-[#C2410C]' : 'text-gray-400 border-transparent hover:text-gray-600'}`}
+              >
+                  Account Details
+              </button>
+              <button 
+                  onClick={() => setActiveTab('password')}
+                  className={`px-8 py-4 text-[11px] font-bold uppercase tracking-widest transition-all border-b-2 ${activeTab === 'password' ? 'text-[#C2410C] border-[#C2410C]' : 'text-gray-400 border-transparent hover:text-gray-600'}`}
+              >
+                  Security
+              </button>
+          </div>
 
-            <div className="p-10 md:p-20 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-20 opacity-[0.03] scale-150 rotate-12">
-                   <ShieldCheck size={200} />
-                </div>
-                
+          <div className="p-8 md:p-12">
                 <AnimatePresence mode="wait">
                     {activeTab === 'profile' ? (
-                        <motion.form key="profile" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} onSubmit={handleProfileUpdate} className="space-y-10 max-w-md mx-auto relative z-10">
-                            <div className="space-y-8">
+                        <motion.form key="profile" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handleProfileUpdate} className="max-w-lg">
+                            <div className="space-y-6">
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Full Name</label>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Full Name</label>
                                     <div className="relative">
-                                        <User className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                                         <input 
                                             type="text" 
-                                            className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-400 transition-all font-black text-xs outline-none" 
-                                            placeholder="ENTER YOUR FULL NAME..."
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                                            placeholder="Your Name"
                                             value={profileData.name} 
                                             onChange={e => setProfileData({...profileData, name: e.target.value})} 
                                         />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Email Address</label>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Email Address</label>
                                     <div className="relative">
-                                        <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                                         <input 
                                             type="email" 
-                                            className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-400 transition-all font-black text-xs outline-none" 
-                                            placeholder="ENTER YOUR EMAIL..."
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                                            placeholder="Your Email"
                                             value={profileData.email} 
                                             onChange={e => setProfileData({...profileData, email: e.target.value})} 
                                         />
                                     </div>
                                 </div>
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Phone Number</label>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Phone Number</label>
                                     <div className="relative">
-                                        <Phone className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                                         <input 
                                             type="tel" 
-                                            className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-400 transition-all font-black text-xs outline-none" 
-                                            placeholder="ENTER YOUR PHONE NUMBER..."
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                                            placeholder="Your Phone Number"
                                             value={profileData.phone} 
                                             onChange={e => setProfileData({...profileData, phone: e.target.value})} 
                                         />
                                     </div>
                                 </div>
                             </div>
-                            <button type="submit" disabled={loading} className="w-full py-5 bg-slate-900 border border-slate-900 hover:bg-black text-white rounded-2xl font-black tracking-[0.3em] text-[11px] shadow-2xl transition-all hover:-translate-y-1 flex items-center justify-center gap-3 active:scale-95">
-                                <Save size={18} /> {loading ? 'SAVING...' : 'SAVE PROFILE'}
+                            <button type="submit" disabled={loading} className="btn-primary mt-10 px-10 h-11">
+                                <Save size={16} /> {loading ? 'Saving...' : 'Update Details'}
                             </button>
                         </motion.form>
                     ) : (
-                        <motion.form key="password" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} onSubmit={handlePasswordChange} className="space-y-10 max-w-md mx-auto relative z-10">
-                            <div className="space-y-8">
+                        <motion.form key="password" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onSubmit={handlePasswordChange} className="max-w-lg">
+                            <div className="space-y-6">
                                 <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Current Password</label>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Current Password</label>
                                     <div className="relative">
-                                        <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+                                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={16} />
                                         <input 
                                             type="password" 
                                             required 
-                                            className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-400 transition-all font-black text-xs outline-none" 
-                                            placeholder="ENTER CURRENT PASSWORD..."
+                                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                                            placeholder="••••••••"
                                             value={passwordData.oldPassword} 
                                             onChange={e => setPasswordData({...passwordData, oldPassword: e.target.value})} 
                                         />
                                     </div>
                                 </div>
-                                <div className="h-px bg-slate-100 my-4"></div>
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">New Password</label>
+                                <div className="pt-4 border-t border-gray-100">
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">New Password</label>
                                     <input 
                                         type="password" 
                                         required 
-                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-400 transition-all font-black text-xs outline-none" 
-                                        placeholder="ENTER NEW PASSWORD..."
+                                        className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium mb-6" 
+                                        placeholder="Min. 8 characters"
                                         value={passwordData.newPassword} 
                                         onChange={e => setPasswordData({...passwordData, newPassword: e.target.value})} 
                                     />
-                                </div>
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Confirm New Password</label>
+                                    <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Confirm Password</label>
                                     <input 
                                         type="password" 
                                         required 
-                                        className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-8 focus:ring-indigo-600/5 focus:border-indigo-400 transition-all font-black text-xs outline-none" 
-                                        placeholder="RETYPE NEW PASSWORD..."
+                                        className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                                        placeholder="Repeat new password"
                                         value={passwordData.confirmPassword} 
                                         onChange={e => setPasswordData({...passwordData, confirmPassword: e.target.value})} 
                                     />
                                 </div>
                             </div>
-                            <button type="submit" disabled={loading} className="w-full py-5 bg-indigo-600 border border-indigo-600 hover:bg-black text-white rounded-2xl font-black tracking-[0.3em] text-[11px] shadow-2xl transition-all hover:-translate-y-1 flex items-center justify-center gap-3 active:scale-95">
-                                <Key size={18} /> {loading ? 'UPDATING...' : 'CHANGE PASSWORD'}
+                            <button type="submit" disabled={loading} className="btn-primary mt-10 px-10 h-11">
+                                <Key size={16} /> {loading ? 'Updating...' : 'Update Password'}
                             </button>
                         </motion.form>
                     )}
                 </AnimatePresence>
-            </div>
-        </div>
+          </div>
       </div>
     </div>
   );

@@ -34,11 +34,20 @@ router.post('/register', async (req, res) => {
       return response.error(res, `An account already exists for this ${role} profile.`, 400);
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12); // Slightly higher rounds for registration
+    const hashedPassword = await bcrypt.hash(password, 12);
     const user = new User({ name, email, phone, password: hashedPassword, role });
     await user.save();
 
-    response.success(res, null, 'Account registered successfully! Welcome to HouseMate.', 201);
+    const token = jwt.sign(
+        { id: user._id, role: user.role }, 
+        process.env.JWT_SECRET, 
+        { expiresIn: process.env.JWT_EXPIRES_IN || '10d' }
+    );
+
+    response.success(res, {
+        token,
+        user: getSafeUserData(user)
+    }, 'Account registered successfully! Welcome to HouseMate.', 201);
   } catch (err) {
     console.error('Registration Error:', err.stack);
     response.error(res, 'Internal registration pipeline failure.');

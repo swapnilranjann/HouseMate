@@ -79,32 +79,32 @@ const ChatPage = () => {
   if (loading) return (
     <div className="h-screen flex flex-col items-center justify-center bg-slate-50">
         <div className="w-16 h-16 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-6"></div>
-        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Loading Secure Chats...</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-400">Loading Chats...</p>
     </div>
   );
 
   return (
-    <div className="max-w-7xl mx-auto px-4 h-[85vh] flex flex-col md:flex-row gap-6 pb-10">
+    <div className="max-w-7xl mx-auto h-[calc(100vh-180px)] flex flex-col md:flex-row gap-4">
       
       {/* Sidebar - Chat List */}
-      <aside className={`w-full md:w-1/3 flex flex-col bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm ${id ? 'hidden md:flex' : 'flex'}`}>
-        <div className="p-8 border-b border-slate-50 bg-slate-50/30">
-            <h2 className="text-2xl font-serif font-black text-slate-900 tracking-tight flex items-center gap-4 uppercase italic-none">
-               <MessageSquare className="text-indigo-600" size={24} /> My Chats
+      <aside className={`w-full md:w-[320px] bg-white border border-gray-200 rounded shadow-sm overflow-hidden flex flex-col ${id ? 'hidden md:flex' : 'flex'}`}>
+        <div className="p-4 border-b border-gray-200 bg-[#FCFDFF]">
+            <h2 className="text-xs font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+               <MessageSquare size={14} className="text-[#C2410C]" /> Messages
             </h2>
-            <div className="relative mt-8">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+            <div className="relative mt-4">
+               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
                <input 
                 type="text" 
-                placeholder="Search chats..." 
-                className="w-full pl-12 pr-4 py-4 bg-white border border-slate-100 rounded-2xl text-[11px] font-black uppercase tracking-widest focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-400 transition-all outline-none" 
+                placeholder="Search..." 
+                className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded text-xs font-medium focus:border-[#C2410C] outline-none" 
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
                />
             </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto">
             {filteredChats.length > 0 ? filteredChats.map(c => {
                 const other = c.participants.find(p => (p._id || p) !== user.id);
                 const isActive = id === c._id;
@@ -112,144 +112,105 @@ const ChatPage = () => {
                     <button 
                         key={c._id}
                         onClick={() => navigate(`/chats/${c._id}`)}
-                        className={`w-full p-6 rounded-[2rem] text-left transition-all duration-300 border ${isActive ? 'bg-indigo-600 border-indigo-600 shadow-2xl scale-[1.02]' : 'bg-white border-slate-50 hover:border-indigo-200 shadow-sm'}`}
+                        className={`w-full p-4 text-left border-b border-gray-100 transition-all ${isActive ? 'bg-[#FFF7ED] border-l-4 border-l-[#C2410C]' : 'hover:bg-gray-50'}`}
                     >
-                        <div className="flex justify-between items-start mb-2">
-                            <span className={`text-[9px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
-                                {other?.role === 'tenant' ? 'OWNER' : 'CLIENT'}
+                        <div className="flex justify-between items-start mb-1">
+                            <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded border ${isActive ? 'bg-[#FFEDD5] border-[#FED7AA] text-[#9A3412]' : 'bg-gray-100 border-gray-200 text-gray-500'}`}>
+                                {other?.role === 'tenant' ? 'Owner' : 'Client'}
                             </span>
-                            <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-indigo-100' : 'text-slate-300'}`}>ACTIVE</span>
+                            <span className="text-[8px] font-bold text-gray-400 uppercase">Active</span>
                         </div>
-                        <h4 className={`text-lg font-serif font-black tracking-tighter truncate leading-none mb-1 ${isActive ? 'text-white' : 'text-slate-900'}`}>{other?.name}</h4>
-                        <p className={`text-[10px] font-bold tracking-wider truncate border-t mt-3 pt-3 flex items-center gap-2 ${isActive ? 'text-indigo-100 border-white/10' : 'text-slate-400 border-slate-50'}`}>
-                            <Activity size={12} /> {c.appointmentId?.propertyId?.name || 'Secure Message'}
+                        <h4 className={`text-sm font-bold truncate ${isActive ? 'text-gray-900' : 'text-gray-700'}`}>{other?.name}</h4>
+                        <p className="text-[10px] text-gray-400 truncate mt-1">
+                            {c.appointmentId?.propertyId?.name || 'General Inquiry'}
                         </p>
                     </button>
                 );
             }) : (
-                <div className="flex flex-col items-center justify-center p-20 opacity-20 filter grayscale">
-                    <ShieldCheck size={48} className="mb-4" />
-                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-center">No Chats Active</p>
+                <div className="flex flex-col items-center justify-center p-12 py-20 text-gray-300">
+                    <MessageSquare size={32} className="mb-2 opacity-50" />
+                    <p className="text-[10px] font-bold uppercase tracking-widest text-center">No Messages</p>
                 </div>
             )}
         </div>
       </aside>
 
       {/* Main View - Active Chat */}
-      <main className={`grow flex flex-col bg-white rounded-[2rem] md:rounded-[2.5rem] overflow-hidden border border-slate-100 shadow-sm ${!id ? 'hidden md:flex' : 'flex'}`}>
+      <main className={`grow bg-white border border-gray-200 rounded shadow-sm overflow-hidden flex flex-col ${!id ? 'hidden md:flex' : 'flex'}`}>
         {id && activeChat ? (
             <>
-                {/* Active Header */}
-                <div className="p-8 border-b border-slate-50 bg-slate-50/30 flex items-center justify-between">
-                    <div className="flex items-center gap-6">
-                        <button onClick={() => navigate('/chats')} className="md:hidden p-3 bg-white border border-slate-100 rounded-xl text-slate-400">
+                <div className="p-4 border-b border-gray-200 bg-[#FCFDFF] flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <button onClick={() => navigate('/chats')} className="md:hidden p-2 text-gray-400 hover:text-gray-600">
                             <ChevronLeft size={20} />
                         </button>
-                        <div className="w-14 h-14 bg-slate-900 rounded-2xl flex items-center justify-center font-black text-2xl text-white shadow-xl relative shrink-0">
+                        <div className="w-10 h-10 bg-gray-900 rounded flex items-center justify-center font-bold text-sm text-white">
                             {activeChat.participants.find(p => (p._id || p) !== user.id)?.name?.[0]}
-                            <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-500 border-4 border-white rounded-full"></span>
                         </div>
-                        <div className="flex flex-col">
-                            <h3 className="text-xl md:text-2xl font-serif font-black text-slate-900 tracking-tighter uppercase leading-none">
+                        <div>
+                            <h3 className="text-sm font-bold text-gray-900 leading-none">
                                 {activeChat.participants.find(p => (p._id || p) !== user.id)?.name}
                             </h3>
-                            <div className="flex items-center gap-2 mt-2">
-                                <ShieldCheck className="text-indigo-600" size={16} />
-                                <span className="text-[9px] font-black text-indigo-600 uppercase tracking-widest">Safe & Secure Chat Active</span>
+                            <div className="flex items-center gap-1.5 mt-1">
+                                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
+                                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-tight">Connected</span>
                             </div>
                         </div>
                     </div>
-                    <div className="hidden lg:flex items-center gap-6">
-                        <div className="text-right">
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Status</p>
-                            <p className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.2em]">Verified Link</p>
-                        </div>
-                        <div className="w-px h-8 bg-slate-100"></div>
-                        <Link to={`/property/${activeChat.appointmentId?.propertyId?._id}`} className="p-4 bg-indigo-50 text-indigo-600 rounded-2xl hover:bg-indigo-600 hover:text-white transition-all shadow-sm">
-                            <Building size={20} />
-                        </Link>
-                    </div>
                 </div>
 
-                {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar bg-slate-50/20">
-                    <div className="flex justify-center mb-10">
-                        <div className="px-6 py-2 bg-white/50 backdrop-blur-md rounded-full border border-slate-100 shadow-sm flex items-center gap-3">
-                            <Lock size={12} className="text-slate-400" />
-                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">This conversation is secure and private.</span>
-                        </div>
-                    </div>
-                    
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#F8FAFC]">
                     {messages.length > 0 ? messages.map((m, idx) => {
                         const isMe = String(m.senderId?._id || m.senderId) === String(user.id);
                         return (
-                            <motion.div 
-                                key={idx}
-                                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}
-                            >
-                                <div className={`max-w-[85%] md:max-w-[70%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-3 group`}>
-                                    <div className={`px-6 md:px-8 py-4 md:py-5 rounded-[1.5rem] shadow-sm text-sm font-medium leading-relaxed ${
-                                        isMe ? 'bg-indigo-600 text-white rounded-tr-none shadow-indigo-100' : 'bg-white border border-slate-200 text-slate-900 rounded-tl-none shadow-slate-100'
+                            <div key={idx} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[80%] ${isMe ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
+                                    <div className={`px-4 py-2.5 rounded text-sm font-medium shadow-sm ${
+                                        isMe ? 'bg-[#C2410C] text-white' : 'bg-white border border-gray-200 text-gray-800'
                                     }`}>
                                         {m.text}
                                     </div>
-                                    <span className={`text-[9px] font-black text-slate-300 uppercase tracking-widest mx-4 opacity-0 group-hover:opacity-100 transition-opacity`}>
+                                    <span className="text-[8px] font-bold text-gray-400 uppercase tracking-tight mx-1">
                                         {new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </span>
                                 </div>
-                            </motion.div>
+                            </div>
                         );
                     }) : (
-                        <div className="h-full flex flex-col items-center justify-center text-center opacity-30 italic-none">
-                            <Clock size={48} className="mb-6 text-slate-300" />
-                            <p className="text-[10px] font-black uppercase text-slate-400 tracking-[0.3em] leading-loose">Start of your private chat history.</p>
+                        <div className="h-full flex flex-col items-center justify-center text-gray-300">
+                            <p className="text-[10px] font-bold uppercase tracking-widest">Beginning of conversation</p>
                         </div>
                     )}
                     <div ref={msgEndRef} />
                 </div>
 
-                {/* Input Area */}
-                <div className="p-8 border-t border-slate-50 bg-white shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.02)]">
+                <div className="p-4 border-t border-gray-200">
                     {activeChat.appointmentId?.status === 'rejected' ? (
-                        <div className="flex flex-col items-center justify-center p-10 bg-rose-50 rounded-[2.5rem] border border-rose-100">
-                            <ShieldCheck className="text-rose-500 mb-4" size={32} />
-                            <p className="text-[11px] font-black text-rose-500 uppercase tracking-[0.3em] text-center leading-loose">
-                                CHAT CLOSED<br/>
-                                <span className="text-rose-400">THE OWNER HAS DECLINED THIS INQUIRY</span>
-                            </p>
+                        <div className="p-3 bg-red-50 text-red-600 rounded text-[10px] font-bold uppercase text-center border border-red-100">
+                            Conversation closed by owner
                         </div>
                     ) : (
-                        <form onSubmit={handleSendMessage} className="flex gap-4">
+                        <form onSubmit={handleSendMessage} className="flex gap-2">
                             <input 
                                 type="text"
                                 value={inputText}
                                 onChange={e => setInputText(e.target.value)}
-                                placeholder="TYPE YOUR MESSAGE..."
-                                className="flex-1 px-8 py-5 bg-slate-50 border border-slate-100 rounded-2xl md:rounded-3xl text-sm font-black tracking-widest transition-all focus:ring-8 focus:ring-indigo-600/5 focus:bg-white outline-none uppercase"
+                                placeholder="Write a message..."
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded text-sm font-medium focus:border-[#C2410C] outline-none"
                             />
-                            <button type="submit" className="bg-slate-900 text-white px-8 rounded-2xl md:rounded-3xl hover:bg-black transition-all shadow-2xl active:scale-95 group">
-                                <Send size={24} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                            <button type="submit" className="bg-gray-900 text-white px-4 py-2 rounded font-bold text-xs uppercase hover:bg-black transition-all flex items-center gap-2">
+                                Send <Send size={14} />
                             </button>
                         </form>
                     )}
                 </div>
             </>
         ) : (
-            <div className="h-full flex flex-col items-center justify-center p-12 text-center bg-slate-50/20">
-                <EmptyState 
-                    title="Select a Chat"
-                    message="Choose a conversation from the sidebar to start messaging safely. Every chat on HouseMate is private and secure."
-                    icon={MessageSquare}
-                    actionText="BROWSE FOR NEW HOMES"
-                    onAction={() => navigate('/')}
-                    color="indigo"
-                />
-                <div className="mt-20 flex items-center gap-4 px-8 py-3 bg-white/50 backdrop-blur-md rounded-full border border-slate-100 shadow-xl">
-                    <span className="w-2 h-2 bg-indigo-500 rounded-full animate-float"></span>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Available and Ready</span>
-                </div>
+            <div className="h-full flex flex-col items-center justify-center p-12 text-center text-gray-300">
+                <MessageSquare size={48} className="mb-4 opacity-20" />
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-2">Select a Conversation</h3>
+                <p className="max-w-xs text-xs font-medium">Choose a connection from the left pane to start communicating.</p>
+                <button onClick={() => navigate('/')} className="mt-6 text-[10px] font-bold uppercase text-[#C2410C] hover:underline">Return to listings</button>
             </div>
         )}
       </main>

@@ -16,56 +16,44 @@ import ForgotPassword from './pages/ForgotPassword';
 import { useAuth } from './context/AuthContext.jsx';
 import { ToastProvider } from './components/ui/ToastProvider.jsx';
 
+import MainLayout from './components/MainLayout';
+
 function App() {
   const { user } = useAuth();
 
   return (
-    <div className="container min-h-screen py-10">
+    <div className="min-h-screen">
       <ToastProvider />
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        
-        {/* Customer Auth */}
-        <Route path="/customer/login" element={!user ? <CustomerLogin /> : <Navigate to="/" />} />
-        <Route path="/customer/register" element={!user ? <CustomerRegister /> : <Navigate to="/" />} />
-        
-        {/* Tenant Auth */}
-        <Route path="/tenant/login" element={!user ? <TenantLogin /> : <Navigate to="/" />} />
-        <Route path="/tenant/register" element={!user ? <TenantRegister /> : <Navigate to="/" />} />
-
-        <Route path="/property/:id" element={<PropertyDetail />} />
-        
-        {/* Protected Tenant Routes */}
-        <Route path="/tenant-dashboard" element={
-          user?.role === 'tenant' ? <TenantDashboard /> : <Navigate to="/tenant/login" />
-        } />
-
-        {/* Protected Customer Routes */}
-        <Route path="/customer-dashboard" element={
-          user?.role === 'customer' ? <CustomerDashboard /> : <Navigate to="/customer/login" />
-        } />
-        <Route path="/favorites" element={
-          user?.role === 'customer' ? <CustomerDashboard isFavorites={true} /> : <Navigate to="/customer/login" />
-        } />
-
-        {/* Global Protected Routes */}
-        <Route path="/chats" element={
-          user ? <ChatPage /> : <Navigate to="/" />
-        } />
-        <Route path="/chats/:id" element={
-          user ? <ChatPage /> : <Navigate to="/" />
-        } />
-        <Route path="/support" element={
-          user ? <SupportPage /> : <Navigate to="/customer/login" />
-        } />
-        <Route path="/profile" element={
-          user ? <ProfilePage /> : <Navigate to="/customer/login" />
-        } />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+      {user ? (
+        <MainLayout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route path="/tenant-dashboard" element={user.role === 'tenant' ? <TenantDashboard /> : <Navigate to="/" />} />
+            <Route path="/customer-dashboard" element={user.role === 'customer' ? <CustomerDashboard /> : <Navigate to="/" />} />
+            <Route path="/favorites" element={user.role === 'customer' ? <CustomerDashboard isFavorites={true} /> : <Navigate to="/" />} />
+            <Route path="/chats" element={<ChatPage />} />
+            <Route path="/chats/:id" element={<ChatPage />} />
+            <Route path="/support" element={<SupportPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </MainLayout>
+      ) : (
+        <div className="container py-10">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/customer/login" element={<CustomerLogin />} />
+            <Route path="/customer/register" element={<CustomerRegister />} />
+            <Route path="/tenant/login" element={<TenantLogin />} />
+            <Route path="/tenant/register" element={<TenantRegister />} />
+            <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
+      )}
     </div>
   );
 }
