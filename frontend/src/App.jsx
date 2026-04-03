@@ -1,5 +1,5 @@
-import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import CustomerLogin from './pages/CustomerLogin';
@@ -13,23 +13,38 @@ import ChatPage from './pages/ChatPage';
 import SupportPage from './pages/SupportPage';
 import ProfilePage from './pages/ProfilePage';
 import ForgotPassword from './pages/ForgotPassword';
+import PageLoader from './components/PageLoader';
 import { useAuth } from './context/AuthContext.jsx';
 import { ToastProvider } from './components/ui/ToastProvider.jsx';
-
 import MainLayout from './components/MainLayout';
+import { AnimatePresence } from 'framer-motion';
 
 function App() {
   const { user } = useAuth();
+  const location = useLocation();
+  const [navLoading, setNavLoading] = useState(false);
+
+  useEffect(() => {
+    setNavLoading(true);
+    const timer = setTimeout(() => {
+      setNavLoading(false);
+    }, 400); 
+    return () => clearTimeout(timer);
+  }, [location.pathname]);
 
   return (
     <div className="min-h-screen">
       <ToastProvider />
+      <AnimatePresence>
+        {navLoading && <PageLoader />}
+      </AnimatePresence>
+      
       {user ? (
         <MainLayout>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
-            <Route path="/tenant-dashboard" element={user.role === 'tenant' ? <TenantDashboard /> : <Navigate to="/" />} />
+            <Route path="/tenant/dashboard" element={user.role === 'tenant' ? <TenantDashboard /> : <Navigate to="/" />} />
             <Route path="/customer-dashboard" element={user.role === 'customer' ? <CustomerDashboard /> : <Navigate to="/" />} />
             <Route path="/favorites" element={user.role === 'customer' ? <CustomerDashboard isFavorites={true} /> : <Navigate to="/" />} />
             <Route path="/chats" element={<ChatPage />} />
@@ -40,7 +55,7 @@ function App() {
           </Routes>
         </MainLayout>
       ) : (
-        <div className="container py-10">
+        <div className="min-h-screen bg-[#F9FAFB]">
           <Navbar />
           <Routes>
             <Route path="/" element={<Home />} />

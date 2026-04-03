@@ -52,8 +52,8 @@ const ProfilePage = () => {
         icon={UserCircle}
         roleLabel="Settings"
         stats={[
-           { label: "Role", value: user.role.toUpperCase() },
-           { label: "Status", value: "Verified", highlight: true }
+           { label: "Account Type", value: (user?.role || 'User').toUpperCase() },
+           { label: "Account Status", value: "Verified", highlight: true }
         ]}
       />
 
