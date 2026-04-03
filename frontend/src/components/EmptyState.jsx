@@ -4,9 +4,9 @@ import { PlusCircle, Search, Mail, AlertTriangle, MapPin, MessageSquare, ShieldC
 
 const EmptyState = ({ title, message, icon: Icon, actionText, onAction, color = "orange" }) => {
   const colorMap = {
-    orange: "text-[#C2410C] bg-[#FFF7ED] border-[#FFEDD5]",
+    orange: "text-primary bg-[#FFF7ED] border-[#FFEDD5]",
     emerald: "text-emerald-600 bg-emerald-50 border-emerald-100",
-    blue: "text-[#C2410C] bg-[#FFF7ED] border-[#FFEDD5]", // standardized
+    blue: "text-primary bg-[#FFF7ED] border-[#FFEDD5]", // standardized
     gray: "text-gray-500 bg-gray-50 border-gray-100"
   };
 

@@ -43,14 +43,14 @@ const PropertyDetail = () => {
   const checkExistingStatus = async (forceInquiryResult = null) => {
     try {
         const [aRes, cRes] = await Promise.all([getMyAppointments(), getChats()]);
-        const appt = aRes.data.find(a => String(a.propertyId?._id) === String(id));
+        const appt = aRes.data.data.find(a => String(a.propertyId?._id) === String(id));
         
         if (appt) setRequestStatus(appt.status);
         else if (forceInquiryResult) setRequestStatus('pending');
 
-        const chat = cRes.data.find(c => 
+        const chat = cRes.data.data.find(c => 
             String(c.appointmentId?._id) === String(appt?._id) || 
-            String(c.appointmentId?._id || c.appointmentId) === String(appt?._id || forceInquiryResult?._id)
+            String(c.appointmentId?._id || c.appointmentId) === String(appt?._id || forceInquiryResult?.data?._id)
         );
         if (chat) {
             setExistingChatId(chat._id);
@@ -116,7 +116,7 @@ const PropertyDetail = () => {
     }
   };
 
-  if (loading) return <div className="h-screen flex items-center justify-center text-[#C2410C] font-bold text-lg">Loading property...</div>;
+  if (loading) return <div className="h-screen flex items-center justify-center font-black text-[10px] uppercase tracking-[0.3em]" style={{ color: 'var(--primary)' }}>Initializing Asset Data...</div>;
   if (!property) return <div className="text-center p-20 text-gray-400">Property not found.</div>;
 
   const allImages = property.images || [];
@@ -127,8 +127,8 @@ const PropertyDetail = () => {
         
         {/* Back navigation */}
         <div className="mb-6 flex items-center justify-between">
-            <button onClick={() => navigate(-1)} className="text-[#C2410C] hover:underline flex items-center gap-1 font-bold text-xs uppercase tracking-widest">
-                <ChevronLeft size={16} /> Back to Listings
+            <button onClick={() => navigate(-1)} style={{ color: 'var(--primary)' }} className="hover:underline flex items-center gap-1 font-black text-[10px] uppercase tracking-widest">
+                <ChevronLeft size={14} /> Return to Marketplace
             </button>
             <div className="flex gap-4">
                 <button 
@@ -148,14 +148,17 @@ const PropertyDetail = () => {
         <div className="bg-white p-6 rounded border border-gray-200 shadow-sm mb-8">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900 mb-2 uppercase tracking-tight">{property.name}</h1>
-                    <p className="text-gray-500 flex items-center gap-2 text-xs font-medium">
-                        <MapPin size={16} className="text-[#C2410C]" /> {property.address}
+                    <h1 className="text-2xl font-black text-gray-900 mb-1 uppercase tracking-wider">{property.name}</h1>
+                    <p className="text-gray-400 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest">
+                        <MapPin size={14} style={{ color: 'var(--primary)' }} /> {property.address}
                     </p>
                 </div>
-                <div className="bg-[#FFF7ED] p-4 rounded border border-[#FFEDD5] text-right min-w-[200px]">
-                    <p className="text-[10px] font-bold text-[#C2410C] uppercase tracking-widest mb-1">Monthly Rent</p>
-                    <p className="text-2xl font-bold text-gray-900">₹{property.price?.toLocaleString() || 'N/A'}</p>
+                <div 
+                    style={{ backgroundColor: 'rgba(var(--primary-rgb), 0.05)', borderColor: 'rgba(var(--primary-rgb), 0.1)' }}
+                    className="p-5 rounded-sm border text-right min-w-[200px] shadow-xs"
+                >
+                    <p style={{ color: 'var(--primary)' }} className="text-[9px] font-black uppercase tracking-[0.2em] mb-1">Valuation / Month</p>
+                    <p className="text-2xl font-black text-gray-900 leading-none">₹{property.price?.toLocaleString() || 'N/A'}</p>
                 </div>
             </div>
         </div>
@@ -171,7 +174,7 @@ const PropertyDetail = () => {
                     {allImages.length > 1 && (
                         <div className="p-4 flex gap-2 overflow-x-auto border-t border-gray-100">
                             {allImages.map((img, i) => (
-                                <button key={i} onClick={() => setActiveImageIdx(i)} className={`w-20 h-20 rounded border-2 transition-all shrink-0 overflow-hidden ${activeImageIdx === i ? 'border-[#C2410C]' : 'border-gray-100'}`}>
+                                <button key={i} onClick={() => setActiveImageIdx(i)} style={{ borderColor: activeImageIdx === i ? 'var(--primary)' : 'transparent' }} className={`w-20 h-20 rounded border-2 transition-all shrink-0 overflow-hidden ${activeImageIdx === i ? '' : 'border-gray-100'}`}>
                                     <img src={`http://localhost:5000${img}`} className="w-full h-full object-cover" alt="Thumb" />
                                 </button>
                             ))}
@@ -180,26 +183,26 @@ const PropertyDetail = () => {
                 </div>
 
                 {/* Key Specs */}
-                <div className="bg-white p-6 rounded border border-gray-200 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div className="bg-white p-6 rounded-sm border border-gray-200 shadow-sm grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div className="flex flex-col items-center text-center">
-                        <Home size={20} className="text-[#C2410C] mb-2" />
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Type</span>
-                        <span className="text-sm font-bold text-gray-800 uppercase">{property.type}</span>
+                        <Home size={18} style={{ color: 'var(--primary)' }} className="mb-2" />
+                        <span className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Category</span>
+                        <span className="text-[10px] font-black text-gray-800 uppercase tracking-wider">{property.type}</span>
                     </div>
                     <div className="flex flex-col items-center text-center">
-                        <Bed size={20} className="text-[#C2410C] mb-2" />
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Conf.</span>
-                        <span className="text-sm font-bold text-gray-800">{property.bhk} BHK</span>
+                        <Bed size={18} style={{ color: 'var(--primary)' }} className="mb-2" />
+                        <span className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Configuration</span>
+                        <span className="text-[10px] font-black text-gray-800 uppercase tracking-wider">{property.bhk} BHK</span>
                     </div>
                     <div className="flex flex-col items-center text-center">
-                        <Building size={20} className="text-[#C2410C] mb-2" />
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Floor</span>
-                        <span className="text-sm font-bold text-gray-800 uppercase">{property.floor}</span>
+                        <Building size={18} style={{ color: 'var(--primary)' }} className="mb-2" />
+                        <span className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Elevation</span>
+                        <span className="text-[10px] font-black text-gray-800 uppercase tracking-wider">{property.floor}</span>
                     </div>
                     <div className="flex flex-col items-center text-center">
-                        <Maximize size={20} className="text-[#C2410C] mb-2" />
-                        <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest mb-1">Area</span>
-                        <span className="text-sm font-bold text-gray-800">{property.dimensions || '800'} SqFt</span>
+                        <Maximize size={18} style={{ color: 'var(--primary)' }} className="mb-2" />
+                        <span className="text-[8px] text-gray-400 font-black uppercase tracking-widest mb-1">Magnitude</span>
+                        <span className="text-[10px] font-black text-gray-800 uppercase tracking-wider">{property.dimensions || '800'} SqFt</span>
                     </div>
                 </div>
 
@@ -241,8 +244,12 @@ const PropertyDetail = () => {
 
                     <div className="space-y-4">
                         {requestStatus === 'idle' ? (
-                            <button onClick={handleRequestAppointment} className="w-full bg-[#C2410C] hover:bg-[#9A3412] text-white py-3 rounded font-bold text-xs uppercase tracking-widest transition-all">
-                                Request Visit
+                            <button 
+                                onClick={handleRequestAppointment} 
+                                style={{ backgroundColor: 'var(--primary)' }}
+                                className="w-full text-white py-3.5 rounded-sm font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-md active:scale-[0.98]"
+                            >
+                                Submit Inquiry
                             </button>
                         ) : ( 
                             <div className={`w-full py-3 rounded font-bold text-[10px] uppercase tracking-widest text-center border ${

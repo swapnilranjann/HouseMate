@@ -60,33 +60,36 @@ const SupportPage = () => {
         ]}
       />
 
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
-          <div className="flex border-b border-gray-200 w-full md:w-auto">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 px-4 md:px-0">
+          <div className="flex border-b border-gray-100 w-full md:w-auto">
               <button 
                   onClick={() => setShowForm(false)}
-                  className={`px-8 py-3 text-sm font-bold uppercase tracking-widest transition-all border-b-2 ${!showForm ? 'border-[#C2410C] text-[#C2410C]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  style={{ borderBottomColor: !showForm ? 'var(--primary)' : 'transparent', color: !showForm ? 'var(--primary)' : '#999' }}
+                  className={`px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2`}
               >
-                  All Tickets
+                  Operational History
               </button>
               <button 
                   onClick={() => setShowForm(true)}
-                  className={`px-8 py-3 text-sm font-bold uppercase tracking-widest transition-all border-b-2 ${showForm ? 'border-[#C2410C] text-[#C2410C]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                  style={{ borderBottomColor: showForm ? 'var(--primary)' : 'transparent', color: showForm ? 'var(--primary)' : '#999' }}
+                  className={`px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2`}
               >
-                  New Request
+                  Initiate Request
               </button>
           </div>
       </div>
 
       <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
         {showForm ? (
-            <div className="p-8 md:p-12 max-w-2xl">
-                <h3 className="text-xl font-bold text-gray-900 mb-8 uppercase border-b border-gray-100 pb-4">Submit a Support Ticket</h3>
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="p-8 md:p-16 max-w-3xl">
+                <h3 className="text-2xl font-black text-gray-900 mb-10 uppercase tracking-[0.2em] border-b border-gray-100 pb-6">Submit Support Protocol</h3>
+                <form onSubmit={handleSubmit} className="space-y-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div>
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Subject Category</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3">Service Category</label>
                             <select 
-                                className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium"
+                                className="w-full px-5 py-3 bg-gray-50 border border-gray-100 rounded-sm outline-none focus:border-primary focus:bg-white text-[11px] font-black uppercase tracking-widest transition-all shadow-sm"
+                                style={{ borderLeftWidth: '4px', borderLeftColor: 'var(--primary)' }}
                                 value={formData.subject}
                                 onChange={e => setFormData({...formData, subject: e.target.value})}
                             >
@@ -99,14 +102,19 @@ const SupportPage = () => {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Priority Level</label>
+                            <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3">Priority Level</label>
                             <div className="flex gap-2">
                                 {['Low', 'Normal', 'High'].map(p => (
                                     <button
                                         key={p}
                                         type="button"
                                         onClick={() => setFormData({...formData, priority: p})}
-                                        className={`flex-1 py-2 rounded text-[10px] font-bold uppercase border transition-all ${formData.priority === p ? 'bg-[#C2410C] border-[#C2410C] text-white' : 'bg-white border-gray-200 text-gray-400 hover:border-gray-300'}`}
+                                        style={{ 
+                                            backgroundColor: formData.priority === p ? 'var(--primary)' : 'white',
+                                            borderColor: formData.priority === p ? 'var(--primary)' : '#eee',
+                                            color: formData.priority === p ? 'white' : '#999'
+                                        }}
+                                        className={`flex-1 py-3 rounded-sm text-[10px] font-black uppercase tracking-[0.2em] border transition-all shadow-xs`}
                                     >
                                         {p}
                                     </button>
@@ -116,50 +124,65 @@ const SupportPage = () => {
                     </div>
 
                     <div>
-                        <label className="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Full Description</label>
+                        <label className="block text-[10px] font-black text-gray-400 uppercase tracking-[0.3em] mb-3">Incident Description</label>
                         <textarea 
                             required
-                            rows="5"
-                            className="w-full px-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium"
-                            placeholder="Please explain your issue in detail..."
+                            rows="6"
+                            className="w-full px-5 py-4 bg-gray-50 border border-gray-100 rounded-sm outline-none focus:border-primary focus:bg-white text-[11px] font-black uppercase tracking-widest transition-all shadow-sm leading-relaxed"
+                            style={{ borderLeftWidth: '4px', borderLeftColor: 'var(--primary)' }}
+                            placeholder="Provide comprehensive details regarding the operational issue..."
                             value={formData.description}
                             onChange={e => setFormData({...formData, description: e.target.value})}
                         ></textarea>
                     </div>
 
-                    <button type="submit" className="btn-primary px-10 h-11">
+                    <button 
+                        type="submit" 
+                        style={{ backgroundColor: 'var(--primary)' }}
+                        className="text-white px-12 py-4 rounded-sm font-black text-[10px] uppercase tracking-[0.3em] transition-all flex items-center gap-3 shadow-lg hover:brightness-110 active:scale-[0.98]"
+                    >
                         <Send size={16} /> Submit Ticket
                     </button>
                 </form>
             </div>
         ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto custom-scrollbar">
                 <table className="w-full text-left border-collapse">
-                    <thead className="bg-[#FCFDFF] border-b border-gray-200">
+                    <thead className="bg-[#FCFDFF] border-b border-gray-100">
                         <tr>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Date Reported</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Subject</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Priority</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
+                            <th className="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Temporal Intel</th>
+                            <th className="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em]">Subject Identifier</th>
+                            <th className="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] text-center">Priority</th>
+                            <th className="px-8 py-5 text-[9px] font-black text-gray-400 uppercase tracking-[0.3em] text-center">Status protocol</th>
                         </tr>
                     </thead>
                     <tbody>
                         {tickets.map(t => (
-                            <tr key={t._id} className="table-row-classic">
-                                <td className="px-6 py-4">
-                                    <div className="flex items-center gap-2 text-sm text-gray-600">
-                                        <Clock size={14} className="text-gray-300" />
-                                        {new Date(t.createdAt).toLocaleDateString()}
+                            <tr key={t._id} className="hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-0">
+                                <td className="px-8 py-5">
+                                    <div className="flex items-center gap-3 text-[11px] text-gray-500 font-black uppercase tracking-widest">
+                                        <Clock size={14} style={{ color: 'var(--primary)' }} className="opacity-50" />
+                                        {new Date(t.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: '2-digit' })}
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-sm font-bold text-gray-800 uppercase tracking-tight">{t.subject}</td>
-                                <td className="px-6 py-4 text-center">
-                                    <span className={`text-[10px] font-bold uppercase ${t.priority === 'High' ? 'text-red-500' : 'text-gray-400'}`}>
+                                <td className="px-8 py-5 text-[11px] font-black text-gray-900 uppercase tracking-tight">{t.subject}</td>
+                                <td className="px-8 py-5 text-center">
+                                    <span 
+                                        style={{ color: t.priority === 'High' ? 'var(--primary)' : '#999' }}
+                                        className={`text-[9px] font-black uppercase tracking-widest`}
+                                    >
                                         {t.priority}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 text-center">
-                                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded border ${getStatusStyle(t.status)}`}>
+                                <td className="px-8 py-5 text-center">
+                                    <span 
+                                        style={{ 
+                                            backgroundColor: t.status === 'Resolved' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(var(--primary-rgb), 0.05)',
+                                            color: t.status === 'Resolved' ? '#10b981' : 'var(--primary)',
+                                            borderColor: t.status === 'Resolved' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(var(--primary-rgb), 0.1)'
+                                        }}
+                                        className={`text-[9px] font-black uppercase tracking-widest px-3 py-1 rounded-sm border`}
+                                    >
                                         {t.status}
                                     </span>
                                 </td>
@@ -168,10 +191,16 @@ const SupportPage = () => {
                     </tbody>
                 </table>
                 {tickets.length === 0 && !loading && (
-                    <div className="py-20 text-center text-gray-400 font-medium">No support tickets found.</div>
+                    <div className="py-24 text-center">
+                         <LifeBuoy size={48} className="mx-auto mb-4 text-gray-100" />
+                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300">Operational history is clear</p>
+                    </div>
                 )}
                 {loading && (
-                    <div className="py-20 text-center text-gray-400 font-medium">Loading history...</div>
+                    <div className="py-24 text-center">
+                         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" style={{ borderColor: 'var(--primary)', borderTopColor: 'transparent' }}></div>
+                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-300">Retrieving Secure Data...</p>
+                    </div>
                 )}
             </div>
         )}

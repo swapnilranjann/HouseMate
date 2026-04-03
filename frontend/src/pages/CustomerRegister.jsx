@@ -17,7 +17,7 @@ const CustomerRegister = () => {
     try {
       await registerUser(formData);
       const { data } = await loginUser({ email: formData.email, password: formData.password, role: 'customer' });
-      login(data.user, data.token);
+      login(data.data.user, data.data.token);
       toast.success('Registration successful. Welcome to HouseMate!');
       navigate('/');
     } catch (err) {
@@ -56,7 +56,8 @@ const CustomerRegister = () => {
                 <input 
                     type="text" 
                     required 
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                    style={{ '--tw-ring-color': 'transparent' }}
                     placeholder="John Doe" 
                     value={formData.name} 
                     onChange={e => setFormData({...formData, name: e.target.value})} 
@@ -72,7 +73,8 @@ const CustomerRegister = () => {
                     <input 
                         type="email" 
                         required 
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                        style={{ '--tw-ring-color': 'transparent' }}
                         placeholder="email@example.com" 
                         value={formData.email} 
                         onChange={e => setFormData({...formData, email: e.target.value})} 
@@ -86,7 +88,8 @@ const CustomerRegister = () => {
                     <input 
                         type="tel" 
                         required 
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                        style={{ '--tw-ring-color': 'transparent' }}
                         placeholder="Phone Number" 
                         value={formData.phone} 
                         onChange={e => setFormData({...formData, phone: e.target.value})} 
@@ -102,7 +105,8 @@ const CustomerRegister = () => {
                 <input 
                     type="password" 
                     required 
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                    style={{ '--tw-ring-color': 'transparent' }}
                     placeholder="••••••••" 
                     value={formData.password} 
                     onChange={e => setFormData({...formData, password: e.target.value})} 
@@ -110,7 +114,7 @@ const CustomerRegister = () => {
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full h-11 uppercase text-[11px] tracking-widest mt-4">
+            <button type="submit" disabled={loading} style={{ backgroundColor: 'var(--primary)' }} className="text-white w-full h-11 uppercase text-[11px] tracking-widest font-bold rounded flex justify-center items-center hover:opacity-90 transition-opacity mt-4">
               {loading ? 'Creating Account...' : 'Register'}
             </button>
           </form>
@@ -118,7 +122,7 @@ const CustomerRegister = () => {
           <div className="mt-8 pt-6 border-t border-gray-100 flex flex-col gap-4">
               <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest">
                 <span className="text-gray-400">Already have an account?</span>
-                <Link to="/customer/login" className="text-[#C2410C] hover:underline">Sign In</Link>
+                <Link to="/customer/login" style={{ color: 'var(--primary)' }} className="hover:underline">Sign In</Link>
               </div>
 
               <Link to="/tenant/register" className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded group hover:bg-gray-100 transition-colors">
@@ -126,10 +130,10 @@ const CustomerRegister = () => {
                     <Building size={16} className="text-gray-400" />
                     <div>
                         <p className="text-[9px] font-bold text-gray-900 uppercase tracking-widest mb-0.5">Are you an owner?</p>
-                        <p className="text-[8px] font-bold text-[#C2410C] uppercase tracking-widest">Register as Owner</p>
+                        <p className="text-[8px] font-bold uppercase tracking-widest" style={{ color: 'var(--primary)' }}>Register as Owner</p>
                     </div>
                 </div>
-                <ChevronRight size={14} className="text-gray-300 group-hover:text-[#C2410C] transition-colors" />
+                <ChevronRight size={14} className="text-gray-300 transition-colors" />
               </Link>
           </div>
         </div>

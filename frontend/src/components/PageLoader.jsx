@@ -10,7 +10,8 @@ const PageLoader = () => {
           {[0, 1, 2, 3].map((i) => (
             <motion.div
               key={i}
-              className="w-3 h-3 bg-[#C2410C] rounded-sm"
+              className="w-3 h-3 rounded-sm"
+              style={{ backgroundColor: 'var(--primary)' }}
               animate={{
                 scale: [1, 1.2, 1],
                 opacity: [0.3, 1, 0.3],

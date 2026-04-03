@@ -61,7 +61,7 @@ const CustomerDashboard = ({ isFavorites = false }) => {
                 {filteredAppointments.map(a => (
                     <div 
                         key={a._id}
-                        className="bg-white rounded p-5 border border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 hover:border-[#C2410C] transition-colors"
+                        className="bg-white rounded p-5 border border-gray-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6 hover:border-primary transition-colors"
                     >
                         <div className="flex items-center gap-6 grow w-full">
                             <Link to={`/property/${a.propertyId?._id}`} className="w-24 h-24 rounded border border-gray-100 overflow-hidden shrink-0">
@@ -69,7 +69,12 @@ const CustomerDashboard = ({ isFavorites = false }) => {
                             </Link>
                             <div className="space-y-1">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold text-[#C2410C] uppercase bg-[#FFF7ED] px-2 py-0.5 rounded">{a.propertyId?.type || 'HOUSE'}</span>
+                                    <span 
+                                        style={{ color: 'var(--primary)', backgroundColor: 'rgba(var(--primary-rgb, 194, 65, 12), 0.1)' }}
+                                        className="text-[10px] font-bold uppercase px-2 py-0.5 rounded"
+                                    >
+                                        {a.propertyId?.type || 'HOUSE'}
+                                    </span>
                                     <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
                                         a.status === 'pending' ? 'bg-amber-50 text-amber-700' :
                                         a.status === 'approved' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
@@ -77,11 +82,11 @@ const CustomerDashboard = ({ isFavorites = false }) => {
                                         {a.status.toUpperCase()}
                                     </span>
                                 </div>
-                                <h3 className="text-lg font-bold text-gray-900 uppercase tracking-tight">{a.propertyId?.name}</h3>
-                                <p className="text-xs text-gray-500 font-medium flex items-center gap-1">
-                                    <MapPin size={14} className="text-[#C2410C]" /> {a.propertyId?.address}
+                                <h3 className="text-lg font-black text-gray-900 uppercase tracking-tight">{a.propertyId?.name}</h3>
+                                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest flex items-center gap-1">
+                                    <MapPin size={14} style={{ color: 'var(--primary)' }} /> {a.propertyId?.address}
                                 </p>
-                                <p className="text-[10px] text-gray-400 font-medium">
+                                <p className="text-[10px] text-gray-300 font-black uppercase tracking-widest">
                                     {new Date(a.createdAt).toLocaleDateString()}
                                 </p>
                             </div>
@@ -89,11 +94,14 @@ const CustomerDashboard = ({ isFavorites = false }) => {
 
                         <div className="flex gap-2 w-full md:w-auto">
                             {a.status !== 'rejected' && (
-                                <Link to={`/chats/${a._id}`} className="bg-gray-900 hover:bg-black text-white px-6 py-2 rounded text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition-all">
+                                <Link 
+                                    to={`/chats/${a._id}`} 
+                                    className="bg-gray-900 hover:bg-black text-white px-6 py-2 rounded text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 transition-all shadow-sm"
+                                >
                                     <MessageSquare size={14} /> Message
                                 </Link>
                             )}
-                            <Link to={`/property/${a.propertyId?._id}`} className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-6 py-2 rounded text-xs font-bold uppercase tracking-widest transition-all">
+                            <Link to={`/property/${a.propertyId?._id}`} className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-500 px-6 py-2 rounded text-[10px] font-black uppercase tracking-[0.2em] transition-all shadow-xs">
                                 View
                             </Link>
                         </div>

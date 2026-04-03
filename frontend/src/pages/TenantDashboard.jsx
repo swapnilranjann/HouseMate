@@ -115,7 +115,11 @@ const TenantDashboard = () => {
                   <button 
                     key={tab}
                     onClick={() => setActiveTab(tab)}
-                    className={`px-8 py-3 text-sm font-bold uppercase tracking-widest transition-all border-b-2 ${activeTab === tab ? 'border-[#C2410C] text-[#C2410C]' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    className={`px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] transition-all border-b-2 ${activeTab === tab ? 'text-primary' : 'border-transparent text-gray-400 hover:text-gray-600'}`}
+                    style={{ 
+                        color: activeTab === tab ? 'var(--primary)' : undefined, 
+                        borderColor: activeTab === tab ? 'var(--primary)' : 'transparent' 
+                    }}
                   >
                       {tab}
                   </button>
@@ -124,9 +128,10 @@ const TenantDashboard = () => {
 
           <button 
             onClick={() => setShowForm(!showForm)}
-            className="btn-primary w-full md:w-auto justify-center"
+            className="btn-primary w-full md:w-auto justify-center uppercase text-[10px] tracking-[0.1em] px-8"
+            style={{ backgroundColor: 'var(--primary)' }}
           >
-            {showForm ? <><X size={18} /> Close Form</> : <><Plus size={18} /> Add New Listing</>}
+            {showForm ? <><X size={16} /> Cancel Operation</> : <><Plus size={16} /> Initialize Asset</>}
           </button>
       </div>
 
@@ -137,30 +142,30 @@ const TenantDashboard = () => {
                 <form onSubmit={handleCreateProperty} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                      <div className="space-y-4">
                         <label className="block text-[10px] font-bold text-gray-400 uppercase">Property Name</label>
-                        <input type="text" placeholder="e.g. Skyline Villa" required className="w-full px-4 py-2 border border-gray-300 rounded focus:border-[#C2410C] outline-none text-sm" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
+                        <input type="text" placeholder="e.g. Skyline Villa" required className="w-full px-4 py-2 border border-gray-300 rounded focus:border-primary outline-none text-sm transition-colors" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
                         
                         <label className="block text-[10px] font-bold text-gray-400 uppercase">Monthly Price (₹)</label>
-                        <input type="number" placeholder="Price" required className="w-full px-4 py-2 border border-gray-300 rounded focus:border-[#C2410C] outline-none text-sm" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
+                        <input type="number" placeholder="Price" required className="w-full px-4 py-2 border border-gray-300 rounded focus:border-primary outline-none text-sm transition-colors" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} />
                         
                         <label className="block text-[10px] font-bold text-gray-400 uppercase">Property Type</label>
-                        <select className="w-full px-4 py-2 border border-gray-300 rounded focus:border-[#C2410C] outline-none text-sm" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
+                        <select className="w-full px-4 py-2 border border-gray-300 rounded focus:border-primary outline-none text-sm transition-colors" value={formData.type} onChange={e => setFormData({...formData, type: e.target.value})}>
                             {['House', 'Flat', 'Villa', 'Office', 'Shop'].map(t => <option key={t} value={t}>{t}</option>)}
                         </select>
                      </div>
                      
                      <div className="space-y-4">
                         <label className="block text-[10px] font-bold text-gray-400 uppercase">Address & Location</label>
-                        <input type="text" placeholder="Full Address" required className="w-full px-4 py-2 border border-gray-300 rounded focus:border-[#C2410C] outline-none text-sm" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
-                        <input type="url" placeholder="Google Maps Link" required className="w-full px-4 py-2 border border-gray-300 rounded focus:border-[#C2410C] outline-none text-sm" value={formData.locationLink} onChange={e => setFormData({...formData, locationLink: e.target.value})} />
+                        <input type="text" placeholder="Full Address" required className="w-full px-4 py-2 border border-gray-300 rounded focus:border-primary outline-none text-sm transition-colors" value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} />
+                        <input type="url" placeholder="Google Maps Link" required className="w-full px-4 py-2 border border-gray-300 rounded focus:border-primary outline-none text-sm transition-colors" value={formData.locationLink} onChange={e => setFormData({...formData, locationLink: e.target.value})} />
                         
                         <div className="flex gap-4">
                             <div className="flex-1">
                                 <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Floor</label>
-                                <input type="text" placeholder="Floor" className="w-full px-4 py-2 border border-gray-300 rounded focus:border-[#C2410C] outline-none text-sm" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} />
+                                <input type="text" placeholder="Floor" className="w-full px-4 py-2 border border-gray-300 rounded focus:border-primary outline-none text-sm transition-colors" value={formData.floor} onChange={e => setFormData({...formData, floor: e.target.value})} />
                             </div>
                             <div className="flex-1">
                                 <label className="block text-[10px] font-bold text-gray-400 uppercase mb-1">Configuration</label>
-                                <select className="w-full px-4 py-2 border border-gray-300 rounded focus:border-[#C2410C] outline-none text-sm" value={formData.bhk} onChange={e => setFormData({...formData, bhk: e.target.value})}>
+                                <select className="w-full px-4 py-2 border border-gray-300 rounded focus:border-primary outline-none text-sm transition-colors" value={formData.bhk} onChange={e => setFormData({...formData, bhk: e.target.value})}>
                                     <option value="1">1 BHK</option>
                                     <option value="2">2 BHK</option>
                                     <option value="3">3 BHK</option>
@@ -177,7 +182,7 @@ const TenantDashboard = () => {
                             <label htmlFor="dash-imgs-pro" className="cursor-pointer text-xs font-bold text-gray-500 flex items-center gap-2">
                                 <Upload size={16} /> Click to Upload Photos
                             </label>
-                            {images.length > 0 && <span className="mt-2 text-[10px] font-bold text-[#C2410C]">{images.length} files selected</span>}
+                            {images.length > 0 && <span className="mt-2 text-[10px] font-bold" style={{ color: 'var(--primary)' }}>{images.length} files selected</span>}
                         </div>
                         
                         <button type="submit" className="btn-primary w-full justify-center h-12 mt-4">
@@ -240,8 +245,12 @@ const TenantDashboard = () => {
                                 </td>
                                 <td className="px-6 py-4 text-right">
                                     <div className="flex gap-2 justify-end">
-                                        <button onClick={() => navigate(`/property/${p._id}`)} className="p-1.5 text-gray-400 hover:text-[#C2410C] border border-transparent hover:border-gray-200 rounded">
-                                            <ArrowUpRight size={16} />
+                                        <button 
+                                            onClick={() => navigate(`/property/${p._id}`)} 
+                                            style={{ color: 'var(--primary)' }}
+                                            className="p-2 border border-gray-100 hover:bg-gray-50 rounded transition-all"
+                                        >
+                                            <ArrowUpRight size={14} />
                                         </button>
                                     </div>
                                 </td>
@@ -250,7 +259,7 @@ const TenantDashboard = () => {
                     </tbody>
                 </table>
                 {properties.length === 0 && (
-                    <div className="py-20 text-center text-gray-400 font-medium">No properties listed yet.</div>
+                    <div className="py-20 text-center text-gray-400 font-bold text-[10px] uppercase tracking-widest">No assets registered.</div>
                 )}
             </div>
         )}
@@ -260,28 +269,28 @@ const TenantDashboard = () => {
                 <table className="w-full text-left border-collapse">
                     <thead className="bg-[#FCFDFF] border-b border-gray-200">
                         <tr>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Requester</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Property</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Created</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-center">Status</th>
-                            <th className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                            <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Requester Identity</th>
+                            <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Target Asset</th>
+                            <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em]">Inquiry Timestamp</th>
+                            <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] text-center">Status</th>
+                            <th className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] text-right">Operational Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {appointments.map(a => (
-                            <tr key={a._id} className="table-row-classic">
+                            <tr key={a._id} className="border-b border-gray-50 hover:bg-gray-50/50 transition-all">
                                 <td className="px-6 py-4">
                                     <div className="flex items-center gap-3">
                                         <div className="w-8 h-8 rounded bg-gray-900 text-white flex items-center justify-center font-bold text-xs uppercase shadow-sm">
                                             {a.customerId?.name?.[0]}
                                         </div>
-                                        <div className="font-bold text-gray-900 text-sm uppercase tracking-tight">{a.customerId?.name}</div>
+                                        <div className="font-black text-gray-800 text-[10px] uppercase tracking-wider">{a.customerId?.name}</div>
                                     </div>
                                 </td>
-                                <td className="px-6 py-4 text-sm font-medium text-gray-600 uppercase tracking-tight">{a.propertyId?.name}</td>
-                                <td className="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">{new Date(a.createdAt).toLocaleDateString()}</td>
+                                <td className="px-6 py-4 text-[10px] font-black text-gray-600 uppercase tracking-tight">{a.propertyId?.name}</td>
+                                <td className="px-6 py-4 text-[9px] font-black text-gray-400 uppercase tracking-widest">{new Date(a.createdAt).toLocaleDateString()}</td>
                                 <td className="px-6 py-4 text-center">
-                                    <span className={`text-[9px] font-bold uppercase px-2 py-0.5 rounded leading-none border shadow-xs ${
+                                    <span className={`text-[9px] font-black uppercase px-3 py-1 rounded leading-none border shadow-xs ${
                                         a.status === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-200' : 
                                         a.status === 'approved' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-red-50 text-red-600 border-red-200'
                                     }`}>
@@ -292,20 +301,28 @@ const TenantDashboard = () => {
                                     <div className="flex gap-2 justify-end">
                                         {a.status === 'pending' ? (
                                             <>
-                                                <button onClick={() => handleUpdateAppointment(a._id, 'approved')} className="text-[#C2410C] hover:bg-[#FFF7ED] p-1.5 rounded transition-all border border-transparent hover:border-[#FFEDD5]">
-                                                    <Check size={18} />
+                                                <button 
+                                                    onClick={() => handleUpdateAppointment(a._id, 'approved')} 
+                                                    style={{ color: 'var(--primary)' }}
+                                                    className="p-2 border border-gray-100 hover:bg-gray-50 rounded transition-all"
+                                                >
+                                                    <Check size={14} />
                                                 </button>
-                                                <button onClick={() => handleUpdateAppointment(a._id, 'rejected')} className="text-red-500 hover:bg-red-50 p-1.5 rounded transition-all border border-transparent hover:border-red-100">
-                                                    <X size={18} />
+                                                <button onClick={() => handleUpdateAppointment(a._id, 'rejected')} className="text-red-500 p-2 border border-gray-100 hover:bg-red-50 rounded transition-all">
+                                                    <X size={14} />
                                                 </button>
                                             </>
                                         ) : (
                                             findChatForAppointment(a._id) ? (
-                                                <Link to={`/chats/${findChatForAppointment(a._id)._id}`} className="text-[#C2410C] hover:bg-[#FFF7ED] px-3 py-1.5 rounded transition-all flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest border border-transparent hover:border-[#FFEDD5]">
-                                                    <MessageSquare size={14} /> Open Chat
+                                                <Link 
+                                                    to={`/chats/${findChatForAppointment(a._id)._id}`} 
+                                                    style={{ color: 'var(--primary)' }}
+                                                    className="px-4 py-1.5 border border-gray-100 rounded transition-all flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest hover:bg-gray-50"
+                                                >
+                                                    <MessageSquare size={12} /> Sync Comms
                                                 </Link>
                                             ) : (
-                                                <span className="text-[10px] text-gray-300 font-bold uppercase tracking-widest px-2 py-1">PROCESSED</span>
+                                                <span className="text-[8px] text-gray-300 font-black uppercase tracking-[0.2em] px-2 py-1">ARCHIVED</span>
                                             )
                                         )}
                                     </div>

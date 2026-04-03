@@ -17,8 +17,8 @@ const TenantLogin = () => {
     setLoading(true);
     try {
       const { data } = await loginUser({ email, password, role: 'tenant' });
-      login(data.user, data.token);
-      toast.success(`Welcome back, ${data.user.name.split(' ')[0]}!`);
+      login(data.data.user, data.data.token);
+      toast.success(`Welcome back, ${data.data.user.name.split(' ')[0]}!`);
       navigate('/tenant/dashboard');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Invalid credentials.');
@@ -59,8 +59,9 @@ const TenantLogin = () => {
                 <input 
                     type="email" 
                     required 
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
-                    placeholder="name@company.com" 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                    style={{ '--tw-ring-color': 'transparent' }}
+                    placeholder="owner@company.com" 
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
                 />
@@ -74,18 +75,19 @@ const TenantLogin = () => {
                 <input 
                     type="password" 
                     required 
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-[#C2410C] text-sm font-medium" 
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded outline-none focus:border-primary text-sm font-medium" 
+                    style={{ '--tw-ring-color': 'transparent' }}
                     placeholder="••••••••" 
                     value={password} 
                     onChange={e => setPassword(e.target.value)} 
                 />
               </div>
               <div className="flex justify-end mt-2">
-                <Link to="/forgot-password" virtual="true" className="text-[10px] font-bold text-[#C2410C] uppercase tracking-widest hover:underline">Forgot password?</Link>
+                <Link to="/forgot-password" style={{ color: 'var(--primary)' }} className="text-[10px] font-bold uppercase tracking-widest hover:underline">Forgot password?</Link>
               </div>
             </div>
 
-            <button type="submit" disabled={loading} className="btn-primary w-full h-11 uppercase text-[11px] tracking-widest">
+            <button type="submit" disabled={loading} style={{ backgroundColor: 'var(--primary)' }} className="text-white w-full h-11 uppercase text-[11px] tracking-widest font-bold rounded flex justify-center items-center hover:opacity-90 transition-opacity">
               {loading ? 'Authenticating...' : 'Sign In'}
             </button>
           </form>
@@ -93,18 +95,18 @@ const TenantLogin = () => {
           <div className="mt-10 pt-8 border-t border-gray-100 flex flex-col gap-6">
               <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-widest">
                 <span className="text-gray-400">New owner?</span>
-                <Link to="/tenant/register" className="text-[#C2410C] hover:underline">Create Account</Link>
+                <Link to="/tenant/register" style={{ color: 'var(--primary)' }} className="hover:underline">Create Portal</Link>
               </div>
 
               <Link to="/customer/login" className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded group hover:bg-gray-100 transition-colors">
                 <div className="flex items-center gap-3">
-                    <UserCircle size={16} className="text-gray-400" />
+                    <User size={16} className="text-gray-400" />
                     <div>
-                        <p className="text-[9px] font-bold text-gray-900 uppercase tracking-widest mb-0.5">Looking for a home?</p>
-                        <p className="text-[8px] font-bold text-[#C2410C] uppercase tracking-widest">Switch to Customer Portal</p>
+                        <p className="text-[9px] font-bold text-gray-900 uppercase tracking-widest mb-0.5">Looking for properties?</p>
+                        <p className="text-[8px] font-bold uppercase tracking-widest" style={{ color: 'var(--primary)' }}>Switch to Customer Portal</p>
                     </div>
                 </div>
-                <ChevronRight size={14} className="text-gray-300 group-hover:text-[#C2410C] transition-colors" />
+                <ChevronRight size={14} className="text-gray-300 transition-colors" />
               </Link>
           </div>
         </div>

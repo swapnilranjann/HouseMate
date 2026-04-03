@@ -63,18 +63,20 @@ const Navbar = () => {
                 
                 {/* User Identity */}
                 <div className="flex items-center gap-4">
-                    <button 
-                        onClick={() => setShowDropdown(!showDropdown)}
-                        className={`flex items-center gap-3 px-3 py-1.5 rounded transition-all relative ${showDropdown ? 'bg-white/10' : 'hover:bg-white/5'}`}
-                    >
-                        <div className="w-8 h-8 rounded bg-[#C2410C] text-white flex items-center justify-center font-bold text-xs shadow-sm">
-                            {user.name?.[0]}
-                        </div>
-                        <div className="flex flex-col text-left">
-                            <span className="text-[11px] font-bold text-white leading-none">{user.name.split(' ')[0]}</span>
-                            <span className="text-[8px] font-bold tracking-widest uppercase mt-1 text-orange-200/60">{user.role}</span>
-                        </div>
-                        <ChevronDown size={14} className={`text-orange-200/40 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                    <div className="relative">
+                        <button 
+                            onClick={() => setShowDropdown(!showDropdown)}
+                            className={`flex items-center gap-3 px-3 py-1.5 rounded transition-all ${showDropdown ? 'bg-white/10' : 'hover:bg-white/5'}`}
+                        >
+                            <div className="w-8 h-8 rounded text-white flex items-center justify-center font-bold text-xs shadow-sm" style={{ backgroundColor: 'var(--primary)' }}>
+                                {user.name?.[0]}
+                            </div>
+                            <div className="flex flex-col text-left">
+                                <span className="text-[11px] font-bold text-white leading-none">{user.name.split(' ')[0]}</span>
+                                <span className="text-[8px] font-bold tracking-widest uppercase mt-1 text-orange-200/60">{user.role}</span>
+                            </div>
+                            <ChevronDown size={14} className={`text-orange-200/40 transition-transform ${showDropdown ? 'rotate-180' : ''}`} />
+                        </button>
                         
                         <AnimatePresence>
                             {showDropdown && (
@@ -84,25 +86,29 @@ const Navbar = () => {
                                     exit={{ opacity: 0, y: 10 }}
                                     className="absolute top-full right-0 mt-2 w-48 bg-white rounded shadow-xl border border-gray-100 overflow-hidden py-1"
                                 >
-                                    <Link to="/profile" className="flex items-center gap-2 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-700 hover:bg-gray-50 border-b border-gray-50">
+                                    <Link to="/profile" onClick={() => setShowDropdown(false)} className="flex items-center gap-2 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-700 hover:bg-gray-50 border-b border-gray-50">
                                         <User size={14} /> Account Profile
                                     </Link>
                                     <button 
-                                        onClick={() => { logout(); navigate('/'); }} 
-                                        className="w-full flex items-center gap-2 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-600 hover:bg-red-50"
+                                        onClick={() => { logout(); setShowDropdown(false); navigate('/'); }} 
+                                        className="w-full flex items-center gap-2 px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-red-600 hover:bg-red-50 text-left"
                                     >
                                         <LogOut size={14} /> Log Out
                                     </button>
                                 </motion.div>
                             )}
                         </AnimatePresence>
-                    </button>
+                    </div>
                 </div>
               </>
             ) : (
               <div className="flex items-center gap-4">
-                  <Link to="/customer/login" className="text-[10px] font-bold uppercase tracking-widest text-white/70 hover:text-white transition-all px-4 py-2">Sign In</Link>
-                  <Link to="/tenant/register" className="bg-[#C2410C] hover:bg-[#9A3412] text-white text-[10px] px-5 py-2.5 rounded font-bold uppercase tracking-widest transition-all shadow-sm">
+                  <div className="flex items-center gap-1 pr-2">
+                    <Link to="/customer/login" className="text-[10px] font-bold uppercase tracking-widest text-white/70 hover:text-white transition-all px-4 py-2">Sign In</Link>
+                    <Link to="/customer/register" className="text-[10px] font-bold uppercase tracking-widest text-white/70 hover:text-white transition-all px-4 py-2">Sign Up</Link>
+                  </div>
+                  <div className="h-6 w-px bg-white/10 mx-1"></div>
+                  <Link to="/tenant/register" className="hover:brightness-110 text-white text-[10px] px-5 py-2.5 rounded font-bold uppercase tracking-widest transition-all shadow-sm" style={{ backgroundColor: 'var(--primary)' }}>
                     List Property
                   </Link>
               </div>
@@ -110,9 +116,31 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Access Trigger */}
-          <button className="lg:hidden p-2 text-white/70 hover:text-white" onClick={() => setShowDropdown(!showDropdown)}>
-            <Menu size={20} />
-          </button>
+          <div className="lg:hidden relative">
+            <button className="p-2 text-white/70 hover:text-white" onClick={() => setShowDropdown(!showDropdown)}>
+                <Menu size={20} />
+            </button>
+            <AnimatePresence>
+                {showDropdown && !user && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute top-full right-0 mt-2 w-48 bg-white rounded shadow-xl border border-gray-100 overflow-hidden py-1"
+                    >
+                        <Link to="/customer/login" onClick={() => setShowDropdown(false)} className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-700 hover:bg-gray-50 border-b border-gray-50 flex items-center gap-2">
+                             <Key size={14} /> Sign In
+                        </Link>
+                        <Link to="/customer/register" onClick={() => setShowDropdown(false)} className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-gray-700 hover:bg-gray-50 border-b border-gray-50 flex items-center gap-2">
+                             <UserPlus size={14} /> Sign Up
+                        </Link>
+                        <Link to="/tenant/register" onClick={() => setShowDropdown(false)} className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-primary hover:bg-primary/5 flex items-center gap-2" style={{ color: 'var(--primary)' }}>
+                             <Building size={14} /> List Property
+                        </Link>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </nav>

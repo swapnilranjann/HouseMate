@@ -46,4 +46,30 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+const server = app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+// Graceful shutdown handler to prevent port hanging
+const gracefulShutdown = () => {
+  console.log('Initiating graceful shutdown...');
+  server.close(() => {
+    console.log('HTTP Server closed.');
+    if (mongoose.connection.readyState === 1) {
+      mongoose.connection.close().then(() => {
+        console.log('MongoDB connection closed.');
+        process.exit(0);
+      });
+    } else {
+      process.exit(0);
+    }
+  });
+  
+  // Force exit if hanging
+  setTimeout(() => {
+    console.error('Could not close connections in time, forcefully shutting down');
+    process.exit(1);
+  }, 10000);
+};
+
+process.on('SIGINT', gracefulShutdown);
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGUSR2', gracefulShutdown); // Nodemon restart signal
